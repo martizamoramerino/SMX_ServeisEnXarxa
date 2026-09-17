@@ -57,6 +57,14 @@ La guia original menciona mDNS a l'índex, però no en desenvolupa la configurac
 
 ## Convencions de la guia
 
+Durant el document trobaràs comentaris HTML amb el format següent:
+
+```html
+<!-- IMATGE IMPRESCINDIBLE: descripció de la captura. Fitxer recomanat: imatges/nom-fitxer.png -->
+```
+
+Aquests comentaris són visibles quan edites el fitxer a Visual Studio Code, però no apareixen en la previsualització del Markdown ni al README publicat. Substitueix cada comentari per la imatge corresponent quan disposis de la captura.
+
 Els valors següents s'utilitzen com a proposta comuna:
 
 | Element | Valor proposat |
@@ -130,6 +138,8 @@ Amb la màquina apagada, entra a **Configuració** i comprova:
 
 Encara no afegeixis la segona interfície. Primer instal·larem i comprovarem el sistema amb una única connexió NAT.
 
+<!-- IMATGE IMPRESCINDIBLE: resum de la configuració inicial de la VM amb RAM, disc, ISO i Adaptador 1 en NAT. Fitxer recomanat: imatges/01-virtualbox-configuracio-inicial.png -->
+
 ### Problemes habituals
 
 - **No apareix cap dispositiu d'arrencada:** comprova que la ISO estigui muntada i revisa l'ordre d'arrencada.
@@ -149,6 +159,8 @@ Inicia la màquina virtual i selecciona:
 Try or Install Ubuntu Server
 ```
 
+<!-- IMATGE IMPRESCINDIBLE: menú d'arrencada de la ISO amb l'opció Try or Install Ubuntu Server seleccionada. Fitxer recomanat: imatges/02-arrencada-instal·lador.png -->
+
 Encara no estem utilitzant el sistema definitiu. Hem arrencat l'entorn que instal·larà Ubuntu al disc virtual.
 
 Si les tecles no responen:
@@ -160,6 +172,8 @@ Si les tecles no responen:
 ### 2.2 Seleccionar l'idioma
 
 Tria l'idioma acordat per a la instal·lació.
+
+<!-- IMATGE IMPRESCINDIBLE: pantalla de selecció d'idioma de l'instal·lador. Fitxer recomanat: imatges/03-seleccio-idioma.png -->
 
 Per navegar per l'assistent pots utilitzar:
 
@@ -179,6 +193,8 @@ Layout: Spanish
 Variant: Spanish
 ```
 
+<!-- IMATGE IMPRESCINDIBLE: configuració de la distribució i variant del teclat. Fitxer recomanat: imatges/04-configuracio-teclat.png -->
+
 Comprova que pots escriure correctament símbols com:
 
 ```text
@@ -194,6 +210,8 @@ Selecciona la instal·lació normal:
 ```text
 Ubuntu Server
 ```
+
+<!-- IMATGE IMPRESCINDIBLE: pantalla de modalitat d'instal·lació amb Ubuntu Server normal seleccionat i no la versió minimized. Fitxer recomanat: imatges/05-modalitat-instal·lacio.png -->
 
 No seleccionis `Ubuntu Server (minimized)` per a aquesta màquina base. Una instal·lació reduïda és vàlida, però pot no incloure eines que utilitzarem per aprendre i diagnosticar.
 
@@ -216,6 +234,8 @@ Com que VirtualBox està configurat en NAT, el seu servei DHCP proporcionarà au
 
 No la copiïs ni la configuris manualment. És només un exemple habitual del NAT de VirtualBox.
 
+<!-- IMATGE IMPRESCINDIBLE: pantalla de xarxa de l'instal·lador mostrant la interfície activa i l'adreça rebuda per DHCP. Fitxer recomanat: imatges/06-xarxa-instal·lacio-dhcp.png -->
+
 Abans de continuar, comprova que:
 
 - [ ] Hi ha una interfície detectada.
@@ -228,6 +248,8 @@ Deixa el camp del proxy buit, tret que la xarxa real on treballis proporcioni ex
 
 No hi introdueixis la passarel·la, el DNS ni la IP del router.
 
+<!-- IMATGE IMPRESCINDIBLE: pantalla del proxy amb el camp buit. Fitxer recomanat: imatges/07-proxy-buit.png -->
+
 ### 2.7 Seleccionar el servidor de paquets
 
 Mantén el mirall oficial proposat per l'instal·lador, per exemple:
@@ -237,6 +259,8 @@ es.archive.ubuntu.com
 ```
 
 Espera que l'instal·lador comprovi que pot contactar-hi.
+
+<!-- IMATGE IMPRESCINDIBLE: pantalla del mirall de paquets validat correctament. Fitxer recomanat: imatges/08-mirall-paquets.png -->
 
 Si falla, revisa abans de canviar el mirall:
 
@@ -256,6 +280,8 @@ Selecciona:
 - El disc virtual de 25 GB.
 - LVM desactivat per seguir la configuració senzilla del material.
 
+<!-- IMATGE IMPRESCINDIBLE: selecció del disc virtual correcte, ús del disc complet i LVM desactivat. Fitxer recomanat: imatges/09-emmagatzematge-guiat.png -->
+
 Abans de confirmar, revisa:
 
 - Nom del disc.
@@ -264,6 +290,8 @@ Abans de confirmar, revisa:
 
 > [!WARNING]
 > La confirmació del particionament és un punt destructiu. En aquesta pràctica només s'ha de modificar el disc virtual creat expressament per a Ubuntu Server.
+
+<!-- IMATGE IMPRESCINDIBLE: resum final de particions i avís de confirmació abans d'escriure els canvis al disc. Fitxer recomanat: imatges/10-confirmacio-particions.png -->
 
 ### 2.9 Crear el perfil
 
@@ -278,11 +306,15 @@ Omple els camps de perfil. La configuració ha d'incloure:
 
 No utilitzis la contrasenya feble que pugui aparèixer a les captures del material.
 
+<!-- IMATGE IMPRESCINDIBLE: pantalla de creació del perfil amb els camps emplenats; oculta o difumina qualsevol contrasenya. Fitxer recomanat: imatges/11-perfil-servidor.png -->
+
 ### 2.10 Ometre Ubuntu Pro
 
 Selecciona l'opció d'ometre Ubuntu Pro.
 
 No és necessari per instal·lar el sistema, actualitzar-lo ni completar les pràctiques del mòdul.
+
+<!-- IMATGE IMPRESCINDIBLE: pantalla d'Ubuntu Pro amb l'opció d'ometre seleccionada. Fitxer recomanat: imatges/12-ometre-ubuntu-pro.png -->
 
 ### 2.11 Instal·lar OpenSSH
 
@@ -292,6 +324,8 @@ Marca:
 Install OpenSSH server
 ```
 
+<!-- IMATGE IMPRESCINDIBLE: pantalla de configuració SSH amb Install OpenSSH server marcat. Fitxer recomanat: imatges/13-instal·lar-openssh.png -->
+
 No importis claus de GitHub o Launchpad en aquesta primera preparació, tret que vulguis treballar explícitament amb autenticació per claus.
 
 ### 2.12 No instal·lar serveis opcionals
@@ -300,6 +334,8 @@ No seleccionis serveis addicionals de la llista de snaps.
 
 Volem mantenir una base comuna i instal·lar cada servei quan en treballem la funció, la configuració i la diagnosi.
 
+<!-- IMATGE IMPRESCINDIBLE: pantalla de serveis o snaps opcionals sense cap servei addicional seleccionat. Fitxer recomanat: imatges/14-serveis-opcionals.png -->
+
 ### 2.13 Finalitzar i reiniciar
 
 Espera que acabi la instal·lació i selecciona:
@@ -307,6 +343,8 @@ Espera que acabi la instal·lació i selecciona:
 ```text
 Reboot Now
 ```
+
+<!-- IMATGE IMPRESCINDIBLE: pantalla de finalització de la instal·lació amb l'opció Reboot Now disponible. Fitxer recomanat: imatges/15-finalitzacio-reinici.png -->
 
 Quan ho demani:
 
@@ -327,6 +365,8 @@ Si torna a aparèixer l'instal·lador, apaga la VM, desmunta la ISO i revisa l'o
 Introdueix el nom d'usuari i la contrasenya creats durant la instal·lació.
 
 Quan escriguis la contrasenya no apareixeran lletres ni asteriscs. És el comportament normal del terminal.
+
+<!-- IMATGE IMPRESCINDIBLE: primer inici de sessió correcte i informació de benvinguda del servidor. No mostris la contrasenya. Fitxer recomanat: imatges/16-primer-inici-sessio.png -->
 
 Comprova l'usuari:
 
@@ -358,6 +398,8 @@ Aquestes ordres permeten identificar:
 - La ruta per defecte.
 - L'espai ocupat i disponible.
 
+<!-- IMATGE IMPRESCINDIBLE: sortida inicial de whoami, hostname, ip -br a, ip route i df -h que identifiqui l'estat de partida. Fitxer recomanat: imatges/17-comprovacions-inicials.png -->
+
 No és necessari que totes les dades coincideixin amb les captures. Cal interpretar si corresponen a la configuració real de la màquina.
 
 ---
@@ -377,6 +419,8 @@ Aquesta ordre actualitza la informació dels paquets disponibles, però no insta
 ```bash
 sudo apt upgrade
 ```
+
+<!-- IMATGE IMPRESCINDIBLE: finalització correcta de l'actualització del sistema, sense errors pendents. Fitxer recomanat: imatges/18-actualitzacio-sistema.png -->
 
 Llegeix el resum i confirma l'operació quan ho demani.
 
@@ -442,6 +486,8 @@ Afegeix o adapta l'entrada del servidor:
 127.0.1.1 srv-smx01.aula.test srv-smx01
 ```
 
+<!-- IMATGE IMPRESCINDIBLE: contingut de /etc/hosts mostrant localhost intacte i l'entrada coherent del servidor. Fitxer recomanat: imatges/19-fitxer-hosts.png -->
+
 No eliminis les entrades necessàries d'IPv6.
 
 Per desar amb Nano:
@@ -468,6 +514,8 @@ srv-smx01
 srv-smx01.aula.test
 ```
 
+<!-- IMATGE IMPRESCINDIBLE: resultat de hostname i hostname -f després del canvi. Fitxer recomanat: imatges/20-comprovacio-hostname.png -->
+
 Editar `/etc/hosts` només crea una associació local al servidor. No configura el DNS del centre ni permet automàticament que altres equips resolguin aquest nom.
 
 ---
@@ -487,6 +535,8 @@ sudo ss -ltnp
 ```
 
 Hauries de trobar el port TCP 22 associat a SSH.
+
+<!-- IMATGE IMPRESCINDIBLE: comprovació de ssh.service, ssh.socket i del port TCP 22 en escolta. Fitxer recomanat: imatges/21-comprovacio-openssh.png -->
 
 Ubuntu 24.04 pot activar SSH mitjançant un socket. Per això, veure únicament `ssh.service` inactiu no és suficient per concloure que SSH no funciona. Cal revisar també `ssh.socket` i els ports en escolta.
 
@@ -514,6 +564,8 @@ La segona ordre ha de retornar:
 ```text
 root
 ```
+
+<!-- IMATGE IMPRESCINDIBLE: comparació entre whoami i sudo whoami per evidenciar el canvi de privilegis. Fitxer recomanat: imatges/22-comprovacio-sudo.png -->
 
 La contrasenya que demana `sudo` és habitualment la del compte que executa l'ordre.
 
@@ -574,6 +626,8 @@ sudo dpkg-reconfigure keyboard-configuration
 
 Selecciona el model, la distribució i la variant corresponents a l'equip.
 
+<!-- IMATGE IMPRESCINDIBLE: assistent dpkg-reconfigure keyboard-configuration mostrant la distribució seleccionada. Només cal incloure-la si s'ha hagut de corregir el teclat. Fitxer recomanat: imatges/23-reconfiguracio-teclat.png -->
+
 Comprova caràcters habituals a les ordres:
 
 ```text
@@ -602,6 +656,8 @@ Interpreta especialment:
 
 Veure UTC no significa automàticament que el rellotge sigui incorrecte.
 
+<!-- IMATGE IMPRESCINDIBLE: sortida inicial de timedatectl amb hora local, UTC, zona horària, NTP i estat de sincronització. Fitxer recomanat: imatges/24-estat-inicial-hora.png -->
+
 ### 9.2 Configurar el fus horari
 
 ```bash
@@ -614,6 +670,8 @@ Ha d'aparèixer:
 ```text
 Time zone: Europe/Madrid
 ```
+
+<!-- IMATGE IMPRESCINDIBLE: sortida de timedatectl després de configurar Europe/Madrid. Fitxer recomanat: imatges/25-fus-horari-madrid.png -->
 
 No ajustis manualment una hora més o menys per compensar l'horari d'estiu. La zona `Europe/Madrid` ja incorpora les regles estacionals.
 
@@ -633,6 +691,8 @@ journalctl -u systemd-timesyncd -b --no-pager -n 30
 ```
 
 Activar NTP no demostra que la sincronització sigui immediata. Cal verificar l'estat final.
+
+<!-- IMATGE IMPRESCINDIBLE: comprovació final de NTP actiu i rellotge sincronitzat. Fitxer recomanat: imatges/26-sincronitzacio-ntp.png -->
 
 ---
 
@@ -658,6 +718,8 @@ Amb la VM apagada:
 6. Confirma que el cable virtual estigui connectat.
 7. Torna a iniciar la màquina.
 
+<!-- IMATGE IMPRESCINDIBLE: configuració de VirtualBox mostrant l'Adaptador 1 en NAT i l'Adaptador 2 a la xarxa interna SMX-LAB. Fitxer recomanat: imatges/27-dos-adaptadors-virtualbox.png -->
+
 Totes les VM que s'hagin de comunicar dins del laboratori han d'utilitzar exactament el mateix nom de xarxa interna.
 
 ### 10.3 Identificar les interfícies
@@ -670,6 +732,8 @@ ip -br a
 És habitual trobar noms com `enp0s3` i `enp0s8`, però poden ser diferents.
 
 Si tens dubtes, compara les adreces MAC mostrades per Ubuntu amb les configurades a VirtualBox.
+
+<!-- IMATGE IMPRESCINDIBLE: sortida de ip -br link i ip -br a mostrant les dues interfícies detectades. Fitxer recomanat: imatges/28-identificacio-interficies.png -->
 
 Tenir dues interfícies no converteix automàticament Ubuntu en un encaminador i tampoc activa NAT dins del servidor.
 
@@ -690,6 +754,8 @@ El fitxer pot tenir noms com:
 00-installer-config.yaml
 50-cloud-init.yaml
 ```
+
+<!-- IMATGE IMPRESCINDIBLE: resultat de ls -l /etc/netplan i sudo netplan get per identificar el fitxer i la configuració reals. Fitxer recomanat: imatges/29-identificacio-netplan.png -->
 
 No obris amb Nano un nom copiat sense haver comprovat que existeix. Si el nom no existeix, podries crear un YAML buit i afegir una configuració conflictiva.
 
@@ -731,6 +797,8 @@ network:
         - 192.168.50.10/24
 ```
 
+<!-- IMATGE IMPRESCINDIBLE: fitxer YAML complet obert a l'editor, amb la indentació visible i els noms reals de les interfícies. Fitxer recomanat: imatges/30-configuracio-netplan.png -->
+
 Adapta `enp0s3` i `enp0s8` als noms reals.
 
 Aquesta configuració estableix:
@@ -753,6 +821,8 @@ Utilitza espais i no tabuladors. La indentació forma part de la sintaxi YAML.
 sudo netplan generate
 ```
 
+<!-- IMATGE IMPRESCINDIBLE: validació de Netplan sense errors abans d'aplicar els canvis. Fitxer recomanat: imatges/31-validacio-netplan.png -->
+
 Si no mostra errors, Netplan pot interpretar la sintaxi. Això encara no demostra que les IP, interfícies, rutes o DNS siguin adequats.
 
 Si hi ha un error amb número de línia, revisa:
@@ -770,6 +840,8 @@ Des de la consola de VirtualBox:
 ```bash
 sudo netplan try
 ```
+
+<!-- IMATGE IMPRESCINDIBLE: prova de Netplan pendent de confirmació, mostrant el mecanisme de reversió temporal. Fitxer recomanat: imatges/32-netplan-try.png -->
 
 Confirma dins del termini només si la configuració funciona.
 
@@ -792,6 +864,8 @@ Hauries de veure:
 - Una IP automàtica a la interfície NAT.
 - `192.168.50.10/24` a la interfície interna.
 
+<!-- IMATGE IMPRESCINDIBLE: sortida final de ip -br a mostrant la IP DHCP del NAT i la IP estàtica de la xarxa interna. Fitxer recomanat: imatges/33-adreces-finals.png -->
+
 ### 11.7 Comprovar les rutes
 
 ```bash
@@ -800,12 +874,16 @@ ip route
 
 La ruta per defecte ha de correspondre a la interfície NAT. En aquesta base simplifiquem la configuració a una única sortida principal.
 
+<!-- IMATGE IMPRESCINDIBLE: sortida de ip route amb una única ruta per defecte associada a la interfície NAT. Fitxer recomanat: imatges/34-rutes-finals.png -->
+
 ### 11.8 Comprovar el DNS
 
 ```bash
 resolvectl status
 getent hosts ubuntu.com
 ```
+
+<!-- IMATGE IMPRESCINDIBLE: comprovació funcional del DNS mitjançant resolvectl status i getent hosts. Fitxer recomanat: imatges/35-comprovacio-dns.png -->
 
 ### 11.9 Fer proves de connectivitat
 
@@ -917,6 +995,8 @@ sudo ss -ltnp
 
 La base només es dona per acabada si les configuracions pertinents es conserven després del reinici.
 
+<!-- IMATGE IMPRESCINDIBLE: evidència conjunta de les comprovacions finals després del reinici, especialment hostname, adreces, ruta i hora. Fitxer recomanat: imatges/36-validacio-despres-reinici.png -->
+
 ### Llista final de validació
 
 - [ ] `whoami` identifica l'usuari correcte.
@@ -967,6 +1047,8 @@ Adaptador 1 NAT amb DHCP.
 Adaptador 2 SMX-LAB amb IP 192.168.50.10/24.
 Zona horària Europe/Madrid i NTP actiu.
 ```
+
+<!-- IMATGE IMPRESCINDIBLE: gestor d'instantànies de VirtualBox mostrant 00_BASE_UBUNTU_SERVER_24_04 creada correctament. Fitxer recomanat: imatges/37-instantania-maquina-base.png -->
 
 Una instantània facilita tornar a un estat anterior, però no substitueix una còpia independent perquè depèn dels fitxers de la màquina virtual.
 
@@ -1154,6 +1236,10 @@ El repositori es pot ampliar a mesura que avancin les pràctiques:
 ```text
 ubuntu-server-smx/
 ├── README.md
+├── imatges/
+│   ├── 01-virtualbox-configuracio-inicial.png
+│   ├── 02-arrencada-instal·lador.png
+│   └── ...
 ├── docs/
 │   ├── 01-installacio/
 │   ├── 02-xarxa-base/
@@ -1192,6 +1278,6 @@ No publiquis al repositori:
 
 ## Autoria i ús docent
 
-Aquesta guia reorganitza el procediment de la presentació d'instal·lació i configuració bàsica d'Ubuntu Server 24.04 LTS elaborada per Carlos Alonso Martínez, i incorpora els aclariments tècnics i didàctics de la guia docent complementària.
+Aquesta guia és una adaptació del procediment del procès d'instal·lació i configuració bàsica d'Ubuntu Server 24.04 LTS elaborada originalment per [Carlos Alonso Martínez a GitHub](https://github.com/carlesalonso), supervisat per Blai Redondo i incorpora els aclariments tècnics i didàctics de la guia docent complementària elaborats per [Martí Zamora i Merino a GitHub](https://github.com/martizamorapia).
 
 En qualsevol adaptació o lliurament cal conservar la referència a l'autoria i la llicència del material original, i diferenciar les ampliacions pròpies de les instruccions de partida.
