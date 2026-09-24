@@ -9,27 +9,51 @@ El procediment segueix la presentació `GUIA UBUNTU SERVER` i incorpora els acla
 
 ## Índex
 
-1. [Resultat final](#resultat-final)
-2. [Convencions de la guia](#convencions-de-la-guia)
-3. [Requisits previs](#requisits-previs)
-4. [Crear la màquina virtual](#1-crear-la-màquina-virtual)
-5. [Instal·lar Ubuntu Server](#2-instal·lar-ubuntu-server)
-6. [Fer les primeres comprovacions](#3-fer-les-primeres-comprovacions)
-7. [Actualitzar el sistema](#4-actualitzar-el-sistema)
-8. [Configurar el nom del servidor](#5-configurar-el-nom-del-servidor)
-9. [Comprovar OpenSSH](#6-comprovar-openssh)
-10. [Gestionar els permisos administratius](#7-gestionar-els-permisos-administratius)
-11. [Configurar el teclat](#8-configurar-el-teclat)
-12. [Configurar la data i l'hora](#9-configurar-la-data-i-lhora)
-13. [Entendre i afegir una segona interfície](#10-entendre-i-afegir-una-segona-interfície)
-14. [Configurar Netplan](#11-configurar-netplan)
-15. [Validar la màquina base](#12-validar-la-màquina-base)
-16. [Crear una instantània](#13-crear-una-instantània)
-17. [Protocol de diagnosi](#protocol-general-de-diagnosi)
-18. [Errors freqüents](#errors-freqüents)
-19. [Preparar l'escenari servidor-client](#14-preparar-lescenari-servidor-client)
-20. [Crear i validar l'OVA](#15-crear-i-validar-lova-de-la-màquina-base)
-21. [Estructura proposada del repositori](#estructura-proposada-del-repositori)
+> Els números que apareixen a continuació coincideixen amb els números reals dels apartats al document. Els punts sense número corresponen a seccions introductòries, transversals o d'annex.
+
+- [Resultat final](#resultat-final)
+- [Convencions de la guia](#convencions-de-la-guia)
+- [Requisits previs](#requisits-previs)
+- **1.** [Crear la màquina virtual](#1-crear-la-màquina-virtual)
+- **2.** [Instal·lar Ubuntu Server](#2-instal·lar-ubuntu-server)
+- **3.** [Fer les primeres comprovacions](#3-fer-les-primeres-comprovacions)
+- **4.** [Actualitzar el sistema](#4-actualitzar-el-sistema)
+- **5.** [Configurar el nom del servidor](#5-configurar-el-nom-del-servidor)
+- **6.** [Comprovar OpenSSH](#6-comprovar-openssh)
+- **7.** [Gestionar els permisos administratius](#7-gestionar-els-permisos-administratius)
+- **8.** [Configurar el teclat](#8-configurar-el-teclat)
+- **9.** [Configurar la data i l'hora](#9-configurar-la-data-i-lhora)
+- **10.** [Entendre i afegir una segona interfície](#10-entendre-i-afegir-una-segona-interfície)
+  - 10.1 [Distingir les peces de la xarxa](#101-distingir-les-peces-de-la-xarxa)
+  - 10.2 [Conèixer els modes de xarxa de VirtualBox](#102-conèixer-els-modes-de-xarxa-de-virtualbox)
+  - 10.3 [Planificar els dos adaptadors](#103-planificar-els-dos-adaptadors)
+  - 10.4 [Apagar correctament el servidor](#104-apagar-correctament-el-servidor)
+  - 10.5 [Configurar VirtualBox](#105-configurar-virtualbox)
+  - 10.6 [Identificar les interfícies i les MAC a Ubuntu](#106-identificar-les-interfícies-i-les-mac-a-ubuntu)
+  - 10.7 [Entendre què aporta la MAC](#107-entendre-què-aporta-la-mac)
+- **11.** [Configurar Netplan](#11-configurar-netplan)
+  - 11.1 [Registrar l'estat abans del canvi](#111-registrar-lestat-abans-del-canvi)
+  - 11.2 [Identificar el fitxer existent](#112-identificar-el-fitxer-existent)
+    - 11.2.1 [Quan Nano mostra `[ New File ]`](#1121-quan-nano-mostra--new-file)
+  - 11.3 [Fer una còpia de seguretat](#113-fer-una-còpia-de-seguretat)
+  - 11.4 [Editar el fitxer real](#114-editar-el-fitxer-real)
+  - 11.5 [Validar la sintaxi](#115-validar-la-sintaxi)
+  - 11.6 [Provar la configuració](#116-provar-la-configuració)
+  - 11.7 [Comprovar les adreces i l'estat de Netplan](#117-comprovar-les-adreces-i-lestat-de-netplan)
+  - 11.8 [Comprovar les rutes](#118-comprovar-les-rutes)
+  - 11.9 [Comprovar el DNS](#119-comprovar-el-dns)
+  - 11.10 [Fer proves de connectivitat per capes](#1110-fer-proves-de-connectivitat-per-capes)
+  - 11.11 [Recuperar-se des de la consola](#1111-recuperar-se-des-de-la-consola)
+  - [Errors habituals de Netplan](#errors-habituals-de-netplan)
+- **12.** [Validar la màquina base](#12-validar-la-màquina-base)
+- **13.** [Crear una instantània](#13-crear-una-instantània)
+- [Protocol general de diagnosi](#protocol-general-de-diagnosi)
+- [Errors freqüents](#errors-freqüents)
+- **14.** [Preparar l'escenari servidor-client](#14-preparar-lescenari-servidor-client)
+- **15.** [Crear i validar l'OVA de la màquina base](#15-crear-i-validar-lova-de-la-màquina-base)
+- [Estructura proposada del repositori](#estructura-proposada-del-repositori)
+- [Fonts tècniques de suport](#fonts-tècniques-de-suport)
+- [Autoria i ús docent](#autoria-i-ús-docent)
 
 ## Resultat final
 
@@ -227,6 +251,7 @@ Variant: Spanish
 ```
 
 ![Configuració de la distribució i variant del teclat](./source/00_UbuntuServer_Images/07-server-selectorteclat.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Configuració de la distribució i variant del teclat -->
 
 Comprova que pots escriure correctament símbols com:
 
@@ -245,6 +270,7 @@ Ubuntu Server
 ```
 
 ![Modalitat d'instal·lació: Ubuntu Server normal](./source/00_UbuntuServer_Images/08-server-modalitat-instal·lacio.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Modalitat d'instal·lació: Ubuntu Server normal -->
 
 No seleccionis `Ubuntu Server (minimized)` per a aquesta màquina base. Una instal·lació reduïda és vàlida, però pot no incloure eines que utilitzarem per aprendre i diagnosticar.
 
@@ -268,6 +294,7 @@ Com que VirtualBox està configurat en NAT, el seu servei DHCP proporcionarà au
 No la copiïs ni la configuris manualment. És només un exemple habitual del NAT de VirtualBox.
 
 ![Configuració de xarxa durant la instal·lació amb DHCP](./source/00_UbuntuServer_Images/09-server-xarxa-instal·lacio-dhcp.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Configuració de xarxa durant la instal·lació amb DHCP -->
 
 Abans de continuar, comprova que:
 
@@ -282,6 +309,7 @@ Deixa el camp del proxy buit, tret que la xarxa real on treballis proporcioni ex
 No hi introdueixis la passarel·la, el DNS ni la IP del router.
 
 ![Configuració del proxy amb el camp buit](./source/00_UbuntuServer_Images/10-server-proxy-buit.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Configuració del proxy amb el camp buit -->
 
 ### 2.7 Seleccionar el servidor de paquets
 
@@ -294,6 +322,7 @@ es.archive.ubuntu.com
 Espera que l'instal·lador comprovi que pot contactar-hi.
 
 ![Mirall de paquets validat correctament](./source/00_UbuntuServer_Images/11-server-mirall-paquets.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Mirall de paquets validat correctament -->
 
 Si falla, revisa abans de canviar el mirall:
 
@@ -314,6 +343,7 @@ Selecciona:
 - LVM desactivat per seguir la configuració senzilla del material.
 
 ![Configuració guiada de l'emmagatzematge amb ús del disc complet](./source/00_UbuntuServer_Images/12-server-emmagatzematge-guiat.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Configuració guiada de l'emmagatzematge amb ús del disc complet -->
 
 Abans de confirmar, revisa:
 
@@ -325,8 +355,10 @@ Abans de confirmar, revisa:
 > La confirmació del particionament és un punt destructiu. En aquesta pràctica només s'ha de modificar el disc virtual creat expressament per a Ubuntu Server.
 
 ![Resum de particions abans de confirmar](./source/00_UbuntuServer_Images/13-server-confirmacio-particions-01.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Resum de particions abans de confirmar -->
 
 ![Confirmació de l'acció destructiva de particionament](./source/00_UbuntuServer_Images/13-server-confirmacio-particions-02.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Confirmació de l'acció destructiva de particionament -->
 
 ### 2.9 Crear el perfil
 
@@ -342,6 +374,7 @@ Omple els camps de perfil. La configuració ha d'incloure:
 No utilitzis la contrasenya feble que pugui aparèixer a les captures del material.
 
 ![Pantalla de creació del perfil de l'usuari i el nom del servidor](./source/00_UbuntuServer_Images/14-server-perfil-servidor.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Pantalla de creació del perfil de l'usuari i el nom del servidor -->
 
 ### 2.10 Ometre Ubuntu Pro
 
@@ -350,6 +383,7 @@ Selecciona l'opció d'ometre Ubuntu Pro.
 No és necessari per instal·lar el sistema, actualitzar-lo ni completar les pràctiques del mòdul.
 
 ![Pantalla d'Ubuntu Pro amb Skip for now seleccionat](./source/00_UbuntuServer_Images/15-server-ometre-ubuntu-pro.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Pantalla d'Ubuntu Pro amb Skip for now seleccionat -->
 
 ### 2.11 Instal·lar OpenSSH
 
@@ -360,6 +394,7 @@ Install OpenSSH server
 ```
 
 ![Pantalla SSH configuration amb Instalar servidor OpenSSH marcat](./source/00_UbuntuServer_Images/16-server-instal·lar-openssh.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Pantalla SSH configuration amb Instalar servidor OpenSSH marcat -->
 
 No importis claus de GitHub o Launchpad en aquesta primera preparació, tret que vulguis treballar explícitament amb autenticació per claus.
 
@@ -370,6 +405,7 @@ No seleccionis serveis addicionals de la llista de snaps.
 Volem mantenir una base comuna i instal·lar cada servei quan en treballem la funció, la configuració i la diagnosi.
 
 ![Pantalla Featured server snaps sense cap servei seleccionat](./source/00_UbuntuServer_Images/17-server-serveis-opcionals.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Pantalla Featured server snaps sense cap servei seleccionat -->
 
 ### 2.13 Finalitzar i reiniciar
 
@@ -382,10 +418,13 @@ Reboot Now
 El procés passa per aquestes pantalles, en aquest ordre:
 
 ![Progrés de la instal·lació del sistema](./source/00_UbuntuServer_Images/18-server-instalant-sistema.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Progrés de la instal·lació del sistema -->
 
 ![Instal·lació completa, abans de seleccionar Reiniciar ahora](./source/00_UbuntuServer_Images/19-server-installacio-completa.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Instal·lació completa, abans de seleccionar Reiniciar ahora -->
 
 ![Instal·lació completa amb Reiniciar ahora seleccionat](./source/00_UbuntuServer_Images/20-server-installacio-completa-reiniciar.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Instal·lació completa amb Reiniciar ahora seleccionat -->
 
 Quan ho demani:
 
@@ -394,19 +433,23 @@ Quan ho demani:
 3. Espera que arrenqui el sistema instal·lat.
 
 ![Avís per retirar el suport d'instal·lació abans de reiniciar](./source/00_UbuntuServer_Images/21-server-retirar-iso.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Avís per retirar el suport d'instal·lació abans de reiniciar -->
 
 Si prement Enter la ISO no s'expulsa sola, pots retirar-la manualment des de **Dispositivos > Unidades ópticas** i seleccionar **Remove Disk From Virtual Drive**.
 
 ![Menú Dispositivos > Unidades ópticas de VirtualBox per treure la ISO manualment](./source/00_UbuntuServer_Images/22-virtualbox-treure-iso-unitat.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Menú Dispositivos > Unidades ópticas de VirtualBox per treure la ISO manualment -->
 
 > [!NOTE]
 > Si l'opció de treure el disc apareix desactivada i cap ISO està marcada, el disc virtual ja s'ha expulsat automàticament. Tanca el menú, prem Enter i espera que es reiniciï; si es queda encallat, selecciona **Máquina > Reiniciar**. No seleccionis cap ISO del menú, perquè les tornaries a inserir.
 
 ![Nota amb els passos a seguir quan el disc ja s'ha expulsat automàticament](./source/00_UbuntuServer_Images/23-nota-retirada-iso.png)
+<!-- Nota/esquema de suport elaborat per al curs: Nota amb els passos a seguir quan el disc ja s'ha expulsat automàticament -->
 
 La instal·lació haurà acabat correctament quan arribis a la petició d'inici de sessió sense tornar a passar per l'assistent.
 
 ![Arrencada del sistema instal·lat després del reinici](./source/00_UbuntuServer_Images/24-server-arrencada-post-installacio.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Arrencada del sistema instal·lat després del reinici -->
 
 Si torna a aparèixer l'instal·lador, apaga la VM, desmunta la ISO i revisa l'ordre d'arrencada.
 
@@ -421,8 +464,10 @@ Introdueix el nom d'usuari i la contrasenya creats durant la instal·lació.
 Quan escriguis la contrasenya no apareixeran lletres ni asteriscs. És el comportament normal del terminal.
 
 ![Prompt de login del servidor](./source/00_UbuntuServer_Images/25-server-login-prompt.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Prompt de login del servidor -->
 
 ![Sessió iniciada amb el missatge de benvinguda i la informació del sistema](./source/00_UbuntuServer_Images/26-server-login-complet.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Sessió iniciada amb el missatge de benvinguda i la informació del sistema -->
 
 Comprova l'usuari:
 
@@ -455,6 +500,7 @@ Aquestes ordres permeten identificar:
 - L'espai ocupat i disponible.
 
 ![Sortida de whoami, hostname, pwd, ip -br a, ip route i df -h](./source/00_UbuntuServer_Images/27-server-comprovacions-inicials.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Sortida de whoami, hostname, pwd, ip -br a, ip route i df -h -->
 
 No és necessari que totes les dades coincideixin amb les captures. Cal interpretar si corresponen a la configuració real de la màquina.
 
@@ -482,8 +528,10 @@ Al terminal veuràs una seqüència semblant a aquesta:
 <!-- Aquesta captura utilitza la forma combinada amb && que s'explica més avall -->
 
 ![Llistat de paquets descarregats durant sudo apt update](./source/00_UbuntuServer_Images/29-server-apt-update-llistat.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Llistat de paquets descarregats durant sudo apt update -->
 
 ![Actualització completada sense errors pendents](./source/00_UbuntuServer_Images/30-server-apt-upgrade-completat.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Actualització completada sense errors pendents -->
 
 Llegeix el resum i confirma l'operació quan ho demani.
 
@@ -522,6 +570,7 @@ ip -br a
 És habitual que una segona execució d'`apt upgrade` no trobi res per instal·lar de seguida:
 
 ![Missatge "The following upgrades have been deferred due to phasing" en un segon sudo apt upgrade](./source/00_UbuntuServer_Images/31-server-apt-upgrade-phasing.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Missatge "The following upgrades have been deferred due to phasing" en un segon sudo apt upgrade -->
 
 ![Nota explicant que el missatge de phasing no és un error](./source/00_UbuntuServer_Images/32-nota-phasing-apt.png)
 <!-- Nota generada per aclarir el missatge, no forma part de la guia original -->
@@ -547,6 +596,9 @@ Obre el fitxer:
 sudo nano /etc/hosts
 ```
 
+![Editor nano acabat d'obrir abans d'editar /etc/hosts](./source/00_UbuntuServer_Images/42-server-nano-hosts-obert.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Editor nano acabat d'obrir abans d'editar /etc/hosts -->
+
 Conserva l'entrada de `localhost`:
 
 ```text
@@ -560,6 +612,7 @@ Afegeix o adapta l'entrada del servidor:
 ```
 
 ![Fitxer /etc/hosts editat amb l'entrada del servidor i les línies IPv6](./source/00_UbuntuServer_Images/34-server-hosts-editat.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Fitxer /etc/hosts editat amb l'entrada del servidor i les línies IPv6 -->
 
 No eliminis les entrades necessàries d'IPv6.
 
@@ -576,6 +629,7 @@ Ctrl + X
 Obre una sessió nova o torna a iniciar sessió. Després executa:
 
 ![Nota amb els passos per editar /etc/hosts i tornar a comprovar amb hostnamectl](./source/00_UbuntuServer_Images/35-nota-passos-hosts-hostnamectl.png)
+<!-- Nota/esquema de suport elaborat per al curs: Nota amb els passos per editar /etc/hosts i tornar a comprovar amb hostnamectl -->
 
 ```bash
 hostname
@@ -592,12 +646,16 @@ srv-smx01.aula.test
 Si el teu servidor encara mostra el hostname per defecte, revisa aquesta seqüència completa. Mostra un exemple real: edició de `/etc/hosts`, comprovació amb `hostname` i persistència del nom després de reiniciar la màquina.
 
 ![Fitxer /etc/hosts amb el nom actualitzat i la comanda hostname escrita](./source/00_UbuntuServer_Images/36-server-hosts-hostname-comanda.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Fitxer /etc/hosts amb el nom actualitzat i la comanda hostname escrita -->
 
 ![Resultat de la comanda hostname després del canvi](./source/00_UbuntuServer_Images/37-server-hostname-resultat.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Resultat de la comanda hostname després del canvi -->
 
 ![Resultat de hostname i hostname -f coincidint](./source/00_UbuntuServer_Images/38-server-hostname-f-resultat.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Resultat de hostname i hostname -f coincidint -->
 
 ![Nou inici de sessió després de reiniciar mostrant el hostname actualitzat de forma persistent](./source/00_UbuntuServer_Images/39-server-reinici-hostname-persistent.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Nou inici de sessió després de reiniciar mostrant el hostname actualitzat de forma persistent -->
 
 Editar `/etc/hosts` només crea una associació local al servidor. No configura el DNS del centre ni permet automàticament que altres equips resolguin aquest nom.
 
@@ -620,6 +678,7 @@ sudo ss -ltnp
 Hauries de trobar el port TCP 22 associat a SSH.
 
 ![Comprovació de hostnamectl, hostname i systemctl status ssh.service ssh.socket](./source/00_UbuntuServer_Images/40-server-comprovacio-openssh.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Comprovació de hostnamectl, hostname i systemctl status ssh.service ssh.socket -->
 
 Ubuntu 24.04 pot activar SSH mitjançant un socket. Per això, veure únicament `ssh.service` inactiu no és suficient per concloure que SSH no funciona. Cal revisar també `ssh.socket` i els ports en escolta.
 
@@ -649,6 +708,7 @@ root
 ```
 
 ![Comanda sudo whoami retornant root](./source/00_UbuntuServer_Images/41-server-comprovacio-sudo.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Comanda sudo whoami retornant root -->
 
 La contrasenya que demana `sudo` és habitualment la del compte que executa l'ordre.
 
@@ -709,11 +769,37 @@ Si la distribució de la consola és incorrecta:
 sudo dpkg-reconfigure keyboard-configuration
 ```
 
+![Terminal amb l'ordre dpkg-reconfigure keyboard-configuration a punt d'executar-se](./source/00_UbuntuServer_Images/43-server-teclat-dpkg-reconfigure-comanda.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Terminal amb l'ordre dpkg-reconfigure keyboard-configuration a punt d'executar-se -->
+
+En demanar privilegis, introdueix la contrasenya de l'usuari:
+
+![Sol·licitud de contrasenya de sudo per a dpkg-reconfigure](./source/00_UbuntuServer_Images/44-server-teclat-sudo-password.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Sol·licitud de contrasenya de sudo per a dpkg-reconfigure -->
+
 Selecciona el model, la distribució i la variant corresponents a l'equip.
 
-<!-- IMATGE IMPRESCINDIBLE: assistent dpkg-reconfigure keyboard-configuration mostrant la distribució seleccionada. Només cal incloure-la si s'ha hagut de corregir el teclat. Fitxer recomanat: imatges/23-reconfiguracio-teclat.png -->
-<!-- CAPTURA PDF (pàgina 36): pantalla "Configuración de keyboard-configuration" amb el llistat de models de teclat -->
-<!-- CAPTURA PDF (pàgina 37): pantalles de país d'origen del teclat (Spanish ressaltat) i distribució de teclat (Spanish ressaltat) -->
+![Assistent de keyboard-configuration amb el llistat de models de teclat](./source/00_UbuntuServer_Images/45-server-teclat-model-teclat.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Assistent de keyboard-configuration amb el llistat de models de teclat -->
+
+![Selecció del país d'origen del teclat (Spanish ressaltat)](./source/00_UbuntuServer_Images/46-server-teclat-pais-origen.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Selecció del país d'origen del teclat (Spanish ressaltat) -->
+
+![Selecció de la distribució del teclat (Spanish ressaltat)](./source/00_UbuntuServer_Images/47-server-teclat-distribucio.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Selecció de la distribució del teclat (Spanish ressaltat) -->
+
+L'assistent també demana la tecla que farà de modificador `AltGr` i, si escau, una tecla modificadora addicional. Si no hi ha cap necessitat especial, deixa els valors per defecte:
+
+![Selecció de la tecla a utilitzar per a AltGr](./source/00_UbuntuServer_Images/48-server-teclat-altgr.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Selecció de la tecla a utilitzar per a AltGr -->
+
+![Selecció de la tecla modificadora](./source/00_UbuntuServer_Images/49-server-teclat-tecla-modificadora.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Selecció de la tecla modificadora -->
+
+En finalitzar, el sistema regenera la configuració de la consola:
+
+![Missatge de confirmació en actualitzar la configuració de la consola i el initramfs](./source/00_UbuntuServer_Images/50-server-teclat-configuracio-completada.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Missatge de confirmació en actualitzar la configuració de la consola i el initramfs -->
 
 Comprova caràcters habituals a les ordres:
 
@@ -743,8 +829,8 @@ Interpreta especialment:
 
 Veure UTC no significa automàticament que el rellotge sigui incorrecte.
 
-<!-- IMATGE IMPRESCINDIBLE: sortida inicial de timedatectl amb hora local, UTC, zona horària, NTP i estat de sincronització. Fitxer recomanat: imatges/24-estat-inicial-hora.png -->
-<!-- CAPTURA PDF (pàgina 38): terminal amb "timedatectl" mostrant Time zone Etc/UTC i System clock synchronized: yes -->
+![Sortida inicial de timedatectl amb hora UTC i estat de sincronització](./source/00_UbuntuServer_Images/51-server-timedatectl-estat-inicial.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Sortida inicial de timedatectl amb hora UTC i estat de sincronització -->
 
 ### 9.2 Configurar el fus horari
 
@@ -759,8 +845,8 @@ Ha d'aparèixer:
 Time zone: Europe/Madrid
 ```
 
-<!-- IMATGE IMPRESCINDIBLE: sortida de timedatectl després de configurar Europe/Madrid. Fitxer recomanat: imatges/25-fus-horari-madrid.png -->
-<!-- CAPTURA PDF (pàgina 39): terminal amb "sudo timedatectl set-timezone Europe/Madrid" i "timedatectl" mostrant Time zone Europe/Madrid (CEST, +0200) -->
+![Sortida de timedatectl després de configurar Europe/Madrid](./source/00_UbuntuServer_Images/52-server-timedatectl-fus-horari-madrid.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Sortida de timedatectl després de configurar Europe/Madrid -->
 
 No ajustis manualment una hora més o menys per compensar l'horari d'estiu. La zona `Europe/Madrid` ja incorpora les regles estacionals.
 
@@ -781,7 +867,8 @@ journalctl -u systemd-timesyncd -b --no-pager -n 30
 
 Activar NTP no demostra que la sincronització sigui immediata. Cal verificar l'estat final.
 
-<!-- IMATGE IMPRESCINDIBLE: comprovació final de NTP actiu i rellotge sincronitzat. Fitxer recomanat: imatges/26-sincronitzacio-ntp.png -->
+![Nota amb els passos per forçar la sincronització de l'hora amb set-ntp false/true](./source/00_UbuntuServer_Images/53-nota-solucionant-errors-data-hora.png)
+<!-- Nota/esquema de suport elaborat per al curs: Nota amb els passos per forçar la sincronització de l'hora amb set-ntp false/true -->
 
 ---
 
@@ -815,7 +902,8 @@ Adaptador de VirtualBox -> adreça MAC -> interfície d'Ubuntu -> configuració 
 
 No pressuposis que l'Adaptador 1 sempre serà `enp0s3`. La forma fiable de relacionar-los és comparar les adreces MAC.
 
-<!-- IMATGE IMPRESCINDIBLE: vista de la configuració avançada d'un adaptador de VirtualBox on es vegi el mode de xarxa, el tipus d'adaptador, l'adreça MAC i el cable connectat. Fitxer recomanat: imatges/26a-elements-adaptador-virtualbox.png -->
+![Configuració avançada de l'Adaptador 1 amb el mode NAT, el tipus d'adaptador i l'adreça MAC visibles](./source/00_UbuntuServer_Images/54-server-virtualbox-adaptador1-nat-mac.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Configuració avançada de l'Adaptador 1 amb el mode NAT, el tipus d'adaptador i l'adreça MAC visibles -->
 
 ### 10.2 Conèixer els modes de xarxa de VirtualBox
 
@@ -864,7 +952,8 @@ Amb la VM apagada:
 8. Confirma que les dues MAC siguin diferents.
 9. Torna a iniciar la màquina.
 
-<!-- IMATGE IMPRESCINDIBLE: configuració de VirtualBox mostrant l'Adaptador 1 en NAT i l'Adaptador 2 a la xarxa interna SMX-LAB. Fitxer recomanat: imatges/27-dos-adaptadors-virtualbox.png -->
+![Resum de la VM amb l'Adaptador 1 en NAT i l'Adaptador 2 a la xarxa interna SMX-LAB](./source/00_UbuntuServer_Images/55-server-virtualbox-resum-dos-adaptadors.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Resum de la VM amb l'Adaptador 1 en NAT i l'Adaptador 2 a la xarxa interna SMX-LAB -->
 
 Totes les VM que s'hagin de comunicar dins del laboratori han d'utilitzar exactament el mateix nom de xarxa interna. `SMX-LAB`, `smx-lab` i `SMX_LAB` no s'han de considerar noms intercanviables.
 
@@ -889,9 +978,14 @@ cat /sys/class/net/enp0s8/address
 
 VirtualBox pot mostrar la MAC sense separadors i amb majúscules. Ubuntu acostuma a mostrar-la amb dos punts i minúscules. Per exemple, `080027A1B2C3` i `08:00:27:a1:b2:c3` representen la mateixa adreça.
 
-<!-- IMATGE IMPRESCINDIBLE: sortida de ip -br link i ip -br a mostrant les dues interfícies detectades. Fitxer recomanat: imatges/28-identificacio-interficies.png -->
+![Sortida de ip -br link i ip -br a després de reiniciar, amb enp0s3 amunt i enp0s8 encara avall perquè Netplan no li ha assignat cap adreça](./source/00_UbuntuServer_Images/56-server-interficies-post-reinici.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Sortida de ip -br link i ip -br a després de reiniciar, amb enp0s3 amunt i enp0s8 encara avall perquè Netplan no li ha assignat cap adreça -->
 
-<!-- IMATGE IMPRESCINDIBLE: correspondència demostrada entre les MAC dels dos adaptadors a VirtualBox i les MAC de les interfícies mostrades amb ip link show o /sys/class/net. Fitxer recomanat: imatges/28a-correspondencia-adaptadors-mac.png -->
+![Sortida de ip link show amb les adreces MAC de les dues interfícies, comparables amb les MAC anotades a VirtualBox](./source/00_UbuntuServer_Images/57-server-mac-interficies-ip-link-show.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Sortida de ip link show amb les adreces MAC de les dues interfícies, comparables amb les MAC anotades a VirtualBox -->
+
+> [!NOTE]
+> En aquest exemple, l'Adaptador 1 de VirtualBox mostra la MAC `080027B70C21`, que coincideix amb `08:00:27:b7:0c:21` a `enp0s3`. És normal que `enp0s8` aparegui com a `DOWN`: la interfície ja existeix, però encara no té cap configuració de Netplan aplicada.
 
 Completa aquest inventari amb els valors reals de la teva VM:
 
@@ -938,7 +1032,8 @@ resolvectl status
 
 Anota quin nom i quina MAC corresponen a cada adaptador. Aquesta evidència permet comparar l'abans i el després i recuperar-se d'una configuració incorrecta.
 
-<!-- IMATGE IMPRESCINDIBLE: estat de xarxa abans de modificar Netplan, amb les interfícies, les MAC, les adreces i la ruta per defecte identificables. Fitxer recomanat: imatges/28b-estat-xarxa-abans-netplan.png -->
+![Sortida de ip -br link, ip -br a, ip route i ip link show abans de tocar cap fitxer de Netplan](./source/00_UbuntuServer_Images/58-server-netplan-estat-abans-copia-edicio.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Sortida de ip -br link, ip -br a, ip route i ip link show abans de tocar cap fitxer de Netplan -->
 
 ### 11.2 Identificar el fitxer existent
 
@@ -954,12 +1049,49 @@ El fitxer pot tenir noms com:
 50-cloud-init.yaml
 ```
 
-<!-- IMATGE IMPRESCINDIBLE: resultat de ls -l /etc/netplan i sudo netplan get per identificar el fitxer i la configuració reals. Fitxer recomanat: imatges/29-identificacio-netplan.png -->
-<!-- CAPTURA PDF (pàgina 28): editor nano amb /etc/netplan/50-cloud-init.yaml mostrant enp0s3 amb dhcp4: true -->
+![Sortida de sudo netplan get mostrant la configuració real aplicada, amb enp0s3 en dhcp4: true](./source/00_UbuntuServer_Images/61-server-netplan-get.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Sortida de sudo netplan get mostrant la configuració real aplicada, amb enp0s3 en dhcp4: true -->
 
 No obris amb Nano un nom copiat sense haver comprovat que existeix. Si el nom no existeix, podries crear un YAML buit i afegir una configuració conflictiva.
 
 Netplan pot combinar diversos fitxers YAML. Cal inspeccionar-los si la configuració aplicada no coincideix amb el fitxer editat.
+
+#### 11.2.1 Quan Nano mostra `[ New File ]`
+
+Aquest error és habitual: escriure un nom de fitxer o de directori que no existeix.
+
+```bash
+sudo nano /etc/netplan/00-instaaller-config.yaml
+```
+
+![Terminal amb l'ordre nano escrita amb un nom de fitxer erroni, dins d'un directori que tampoc existeix](./source/00_UbuntuServer_Images/59-server-netplan-nano-fitxer-incorrecte.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Terminal amb l'ordre nano escrita amb un nom de fitxer erroni, dins d'un directori que tampoc existeix -->
+
+![Nano mostrant l'indicador New File perquè la ruta escrita no existeix](./source/00_UbuntuServer_Images/60-server-netplan-new-file.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Nano mostrant l'indicador New File perquè la ruta escrita no existeix -->
+
+> [!WARNING]
+> Si Nano mostra `[ New File ]`, la ruta escrita no existeix i l'editor està preparat per crear-ne un de nou. **Això no demostra que Netplan estigui buit.** Desar aquest fitxer nou no modifica la configuració real i pot afegir un YAML conflictiu al directori.
+
+Actuació correcta:
+
+1. Surt sense desar amb `Ctrl + X` i respon `N` si et pregunta si vols desar.
+2. Consulta `/etc/netplan` amb `ls -lah` per veure quins fitxers existeixen realment.
+3. Obre el nom exacte del fitxer trobat.
+
+```bash
+ls -lah /etc/netplan
+```
+
+![Resultat de ls -lah /etc/netplan mostrant el fitxer real 50-cloud-init.yaml amb propietari root i permisos 600](./source/00_UbuntuServer_Images/62-server-netplan-ls-permisos.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Resultat de ls -lah /etc/netplan mostrant el fitxer real 50-cloud-init.yaml amb propietari root i permisos 600 -->
+
+```bash
+sudo nano /etc/netplan/50-cloud-init.yaml
+```
+
+![Fitxer real obert amb Nano, mostrant la configuració DHCP inicial d'enp0s3](./source/00_UbuntuServer_Images/63-server-netplan-fitxer-real-obert.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Fitxer real obert amb Nano, mostrant la configuració DHCP inicial d'enp0s3 -->
 
 ### 11.3 Fer una còpia de seguretat
 
@@ -973,7 +1105,7 @@ Comprova els fitxers i permisos:
 ls -l /etc/netplan
 ```
 
-Habitualment, els fitxers de configuració han de pertànyer a root i tenir permisos restrictius, com ara `600`.
+Habitualment, els fitxers de configuració han de pertànyer a root i tenir permisos restrictius, com ara `600`. En una instal·lació estàndard, el fitxer generat per `cloud-init` ja acostuma a tenir aquests permisos per defecte, tal com es veu a la captura anterior.
 
 Si el fitxer editat té permisos massa oberts, ajusta'ls substituint el nom pel fitxer real:
 
@@ -1005,9 +1137,11 @@ network:
         - 192.168.50.10/24
 ```
 
-<!-- IMATGE IMPRESCINDIBLE: fitxer YAML complet obert a l'editor, amb la indentació visible i els noms reals de les interfícies. Fitxer recomanat: imatges/30-configuracio-netplan.png -->
-<!-- CAPTURA PDF (pàgina 30): editor nano amb /etc/netplan/00-installer-config.yaml en mode estàtic (dhcp4: no, addresses 192.168.1.222/24, routes via 192.168.1.1) -->
-<!-- CAPTURA PDF (pàgina 33): exemple YAML amb enp0s3 (dhcp4: true) i enp0s8 (dhcp4: no, addresses 192.168.4.253/24) sense porta d'enllaç al segon adaptador -->
+![Fitxer YAML complet obert a l'editor amb les dues interfícies, la indentació visible i els noms reals enp0s3/enp0s8](./source/00_UbuntuServer_Images/64-server-netplan-editor-final-editat.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): Fitxer YAML complet obert a l'editor amb les dues interfícies, la indentació visible i els noms reals enp0s3/enp0s8 -->
+
+> [!NOTE]
+> La captura mostra el fitxer real `50-cloud-init.yaml` sense la clau `renderer`. Ometre-la és vàlid: Netplan utilitza `systemd-networkd` per defecte a Ubuntu Server. Afegir-la explícitament només documenta la intenció de manera més clara.
 
 Adapta `enp0s3` i `enp0s8` als noms reals.
 
@@ -1138,16 +1272,40 @@ ip neigh
 
 La ruta cap a `192.168.50.20` ha d'utilitzar directament la interfície de `SMX-LAB`, sense passar per la passarel·la NAT.
 
+### 11.11 Recuperar-se des de la consola
+
+Si una configuració incorrecta talla la connexió SSH, entra per la consola de VirtualBox. Primer identifica el fitxer incorrecte i compara'l amb la còpia feta al pas 11.3. No eliminis tots els YAML a cegues.
+
+Per restaurar el fitxer concret utilitzat en aquesta màquina:
+
+```bash
+sudo cp /root/netplan-abans-canvi/50-cloud-init.yaml /etc/netplan/50-cloud-init.yaml
+sudo chmod 600 /etc/netplan/50-cloud-init.yaml
+sudo netplan generate
+sudo netplan apply
+```
+
+Substitueix `50-cloud-init.yaml` pel nom real del fitxer de la teva màquina.
+
+Si existeixen altres fitxers creats després de la còpia, inspecciona'ls abans de prendre cap decisió. Restaurar un fitxer no elimina automàticament altres YAML que puguin entrar en conflicte.
+
 ### Errors habituals de Netplan
 
-- **S'obre un fitxer buit:** probablement has escrit un nom que no existia.
-- **No afecta cap interfície:** comprova els noms amb `ip -br link`.
-- **Es manté una IP automàtica inesperada:** revisa `dhcp4` i la resta de YAML.
-- **Es perd SSH:** entra per la consola de VirtualBox, revisa el YAML i restaura la còpia correcta.
-- **Restaures una còpia però el problema continua:** comprova si han quedat altres YAML que entren en conflicte.
-- **Avís de permisos:** revisa propietari i permisos restrictius del fitxer.
-- **No hi ha sortida exterior:** revisa `ip route` i comprova que la ruta per defecte sigui la del NAT.
-- **Arriba per IP però no per nom:** revisa `resolvectl status` i la resolució DNS.
+| Símptoma | Causa probable | Actuació |
+|---|---|---|
+| Nano mostra `[ New File ]` | Ruta o nom de fitxer inexistents | Surt sense desar i executa `ls -lah /etc/netplan` |
+| El YAML només mostra `enp0s3` | L'adaptador nou no s'afegeix automàticament al fitxer | Identifica la segona interfície amb `ip -br link` i afegeix-la manualment |
+| Només es detecta una interfície | L'Adaptador 2 està desactivat o el cable desconnectat | Revisa la configuració de VirtualBox i reinicia la VM |
+| `netplan generate` marca una línia | Indentació, tabulador o propietat incorrectes | Revisa la línia indicada i l'anterior |
+| La IP no s'aplica a la interfície esperada | El nom d'interfície del YAML no és el real | Compara `ip -br link` amb les MAC anotades |
+| Avís de permisos | El YAML és massa accessible | Aplica propietari `root:root` i permisos `600` |
+| Es perd Internet | La ruta per defecte o el NAT no són correctes | Revisa `ip route` i la configuració de l'Adaptador 1 |
+| Hi ha Internet per IP però no per nom | Problema de resolució DNS | Revisa `resolvectl status` i `getent hosts` |
+| No es veu el client de `SMX-LAB` | Nom de xarxa interna, IP, prefix, cable o MAC incorrectes | Revisa `ip neigh` i la configuració dels dos adaptadors |
+| El canvi desapareix després d'aplicar-lo | Hi ha diversos YAML o `cloud-init` regenera el fitxer | Revisa `sudo netplan get` i inspecciona tots els fitxers de `/etc/netplan` |
+| La xarxa és intermitent | Adreces IP o MAC duplicades entre VM | Assigna identificadors únics a cada màquina |
+| Es perd SSH en aplicar el canvi | El YAML nou talla la connexió activa | Entra per la consola de VirtualBox, revisa el YAML i restaura la còpia |
+| Restaures una còpia però el problema continua | Han quedat altres YAML que entren en conflicte | Inspecciona tots els fitxers abans de prendre cap decisió |
 
 ---
 
