@@ -108,7 +108,13 @@ La ISO es troba a l'ordinador físic. VirtualBox la presenta a la màquina virtu
 
 ### 1.1 Crear una màquina nova
 
-Obre VirtualBox i selecciona **Màquina > Nova**.
+Obre VirtualBox i selecciona **Màquina > Nova**. A la primera pantalla de l'assistent indica el nom de la VM, la carpeta on es desarà i la ISO d'Ubuntu Server. VirtualBox detecta el sistema operatiu convidat a partir de la ISO seleccionada.
+
+<!-- CAPTURA VIRTUALBOX: pantalla "Virtual machine name and operating system" amb el nom, la carpeta i la ISO seleccionats -->
+![Nom de la VM i sistema operatiu](./source/00_UbuntuServer_Images/01-virtualbox-creacioserver.png)
+
+> [!NOTE]
+> La captura mostra un exemple amb el nom `UbuntuServer_BaseStudy` i Ubuntu 24.10 detectat automàticament. Per a aquesta guia utilitza el nom acordat `UbuntuServer24.04_BASE` i comprova que la ISO correspongui a Ubuntu Server **24.04 LTS**.
 
 Configura els valors següents:
 
@@ -126,11 +132,29 @@ Configura els valors següents:
 > [!NOTE]
 > La presentació original mostra un disc de 10 GB. Per preparar una base útil per a actualitzacions i pràctiques posteriors, la guia docent recomana 25 GB.
 
-### 1.2 Evitar la instal·lació desatesa
+### 1.2 Assistent d'instal·lació desatesa
 
-Si VirtualBox ofereix una instal·lació desatesa, selecciona l'opció equivalent a **Ometre instal·lació desatesa**.
+L'assistent de VirtualBox 7.x ofereix l'opció **Proceed with Unattended Installation**. Si la deixes activada, la pantalla següent et demanarà l'usuari, la contrasenya i el nom del servidor perquè VirtualBox els injecti automàticament durant la instal·lació.
 
-Això permet seguir manualment totes les pantalles de l'instal·lador i comprendre les decisions adoptades.
+<!-- CAPTURA VIRTUALBOX: pantalla "Set up unattended guest OS installation" amb el nom d'usuari, la contrasenya i el Host Name -->
+![Instal·lació desatesa: usuari i nom del servidor](./source/00_UbuntuServer_Images/00-virtualbox-config-inicial.png)
+
+> [!IMPORTANT]
+> Aquesta guia segueix manualment totes les pantalles de l'instal·lador perquè es puguin comprendre les decisions adoptades (secció 2). Si vols seguir-la pas a pas tal com està escrita, desactiva **Proceed with Unattended Installation** a l'assistent. Si la deixes activada, VirtualBox completarà per tu els passos d'idioma, usuari i xarxa descrits a la secció 2 i podràs saltar directament a la secció 3.
+
+A continuació, l'assistent demana la memòria RAM, el nombre de processadors i la mida del disc.
+
+<!-- CAPTURA VIRTUALBOX: pantalla "Specify virtual hardware" amb la memòria base, el nombre de CPU i la mida del disc -->
+![Maquinari virtual: memòria, CPU i disc](./source/00_UbuntuServer_Images/02_virtualbox-assignaciomemoria.png)
+
+Ajusta la memòria base a **4096 MB** i la mida del disc a **25 GB**, tal com indica la taula anterior.
+
+Abans de crear la VM, l'assistent mostra un resum de tots els valors escollits.
+
+<!-- CAPTURA VIRTUALBOX: pantalla "Resumen" amb el nom, la carpeta, la ISO, el tipus de SO, la memòria i la mida del disc -->
+![Resum de la creació de la VM](./source/00_UbuntuServer_Images/03_virtualbox-resum.png)
+
+Revisa'l abans de prémer **Terminar/Finish** i corregeix qualsevol valor que no coincideixi amb la taula de l'apartat 1.1.
 
 ### 1.3 Revisar la configuració
 
@@ -144,7 +168,8 @@ Amb la màquina apagada, entra a **Configuració** i comprova:
 
 Encara no afegeixis la segona interfície. Primer instal·larem i comprovarem el sistema amb una única connexió NAT.
 
-<!-- IMATGE IMPRESCINDIBLE: resum de la configuració inicial de la VM amb RAM, disc, ISO i Adaptador 1 en NAT. Fitxer recomanat: imatges/01-virtualbox-configuracio-inicial.png -->
+<!-- CAPTURA PDF (pàgina 5) / VIRTUALBOX: vista de Detalls de la VM amb el resum General/Sistema/Pantalla/Almacenamiento/Red -->
+![Resum final de la configuració de la VM](./source/00_UbuntuServer_Images/04_virtualbox-configuraciofinal.png)
 
 ### Problemes habituals
 
@@ -165,7 +190,8 @@ Inicia la màquina virtual i selecciona:
 Try or Install Ubuntu Server
 ```
 
-<!-- IMATGE IMPRESCINDIBLE: menú d'arrencada de la ISO amb l'opció Try or Install Ubuntu Server seleccionada. Fitxer recomanat: imatges/02-arrencada-instal·lador.png -->
+![Menú d'arrencada GRUB amb Try or Install Ubuntu Server](./source/00_UbuntuServer_Images/05-server-tryinstall.png)
+<!-- Imatge extreta d'altres guies -->
 
 Encara no estem utilitzant el sistema definitiu. Hem arrencat l'entorn que instal·larà Ubuntu al disc virtual.
 
@@ -179,7 +205,8 @@ Si les tecles no responen:
 
 Tria l'idioma acordat per a la instal·lació.
 
-<!-- IMATGE IMPRESCINDIBLE: pantalla de selecció d'idioma de l'instal·lador. Fitxer recomanat: imatges/03-seleccio-idioma.png -->
+![Selecció d'idioma de l'instal·lador](./source/00_UbuntuServer_Images/06-server-seleccionaridioma.png)
+<!-- Imatge extreta d'altres guies -->
 
 Per navegar per l'assistent pots utilitzar:
 
@@ -199,7 +226,7 @@ Layout: Spanish
 Variant: Spanish
 ```
 
-<!-- IMATGE IMPRESCINDIBLE: configuració de la distribució i variant del teclat. Fitxer recomanat: imatges/04-configuracio-teclat.png -->
+![Configuració de la distribució i variant del teclat](./source/00_UbuntuServer_Images/07-server-selectorteclat.png)
 
 Comprova que pots escriure correctament símbols com:
 
@@ -217,7 +244,7 @@ Selecciona la instal·lació normal:
 Ubuntu Server
 ```
 
-<!-- IMATGE IMPRESCINDIBLE: pantalla de modalitat d'instal·lació amb Ubuntu Server normal seleccionat i no la versió minimized. Fitxer recomanat: imatges/05-modalitat-instal·lacio.png -->
+![Modalitat d'instal·lació: Ubuntu Server normal](./source/00_UbuntuServer_Images/08-server-modalitat-instal·lacio.png)
 
 No seleccionis `Ubuntu Server (minimized)` per a aquesta màquina base. Una instal·lació reduïda és vàlida, però pot no incloure eines que utilitzarem per aprendre i diagnosticar.
 
@@ -240,7 +267,7 @@ Com que VirtualBox està configurat en NAT, el seu servei DHCP proporcionarà au
 
 No la copiïs ni la configuris manualment. És només un exemple habitual del NAT de VirtualBox.
 
-<!-- IMATGE IMPRESCINDIBLE: pantalla de xarxa de l'instal·lador mostrant la interfície activa i l'adreça rebuda per DHCP. Fitxer recomanat: imatges/06-xarxa-instal·lacio-dhcp.png -->
+![Configuració de xarxa durant la instal·lació amb DHCP](./source/00_UbuntuServer_Images/09-server-xarxa-instal·lacio-dhcp.png)
 
 Abans de continuar, comprova que:
 
@@ -254,7 +281,7 @@ Deixa el camp del proxy buit, tret que la xarxa real on treballis proporcioni ex
 
 No hi introdueixis la passarel·la, el DNS ni la IP del router.
 
-<!-- IMATGE IMPRESCINDIBLE: pantalla del proxy amb el camp buit. Fitxer recomanat: imatges/07-proxy-buit.png -->
+![Configuració del proxy amb el camp buit](./source/00_UbuntuServer_Images/10-server-proxy-buit.png)
 
 ### 2.7 Seleccionar el servidor de paquets
 
@@ -266,7 +293,7 @@ es.archive.ubuntu.com
 
 Espera que l'instal·lador comprovi que pot contactar-hi.
 
-<!-- IMATGE IMPRESCINDIBLE: pantalla del mirall de paquets validat correctament. Fitxer recomanat: imatges/08-mirall-paquets.png -->
+![Mirall de paquets validat correctament](./source/00_UbuntuServer_Images/11-server-mirall-paquets.png)
 
 Si falla, revisa abans de canviar el mirall:
 
@@ -286,7 +313,7 @@ Selecciona:
 - El disc virtual de 25 GB.
 - LVM desactivat per seguir la configuració senzilla del material.
 
-<!-- IMATGE IMPRESCINDIBLE: selecció del disc virtual correcte, ús del disc complet i LVM desactivat. Fitxer recomanat: imatges/09-emmagatzematge-guiat.png -->
+![Configuració guiada de l'emmagatzematge amb ús del disc complet](./source/00_UbuntuServer_Images/12-server-emmagatzematge-guiat.png)
 
 Abans de confirmar, revisa:
 
@@ -297,7 +324,9 @@ Abans de confirmar, revisa:
 > [!WARNING]
 > La confirmació del particionament és un punt destructiu. En aquesta pràctica només s'ha de modificar el disc virtual creat expressament per a Ubuntu Server.
 
-<!-- IMATGE IMPRESCINDIBLE: resum final de particions i avís de confirmació abans d'escriure els canvis al disc. Fitxer recomanat: imatges/10-confirmacio-particions.png -->
+![Resum de particions abans de confirmar](./source/00_UbuntuServer_Images/13-server-confirmacio-particions-01.png)
+
+![Confirmació de l'acció destructiva de particionament](./source/00_UbuntuServer_Images/13-server-confirmacio-particions-02.png)
 
 ### 2.9 Crear el perfil
 
@@ -312,7 +341,7 @@ Omple els camps de perfil. La configuració ha d'incloure:
 
 No utilitzis la contrasenya feble que pugui aparèixer a les captures del material.
 
-<!-- IMATGE IMPRESCINDIBLE: pantalla de creació del perfil amb els camps emplenats; oculta o difumina qualsevol contrasenya. Fitxer recomanat: imatges/11-perfil-servidor.png -->
+![Pantalla de creació del perfil de l'usuari i el nom del servidor](./source/00_UbuntuServer_Images/14-server-perfil-servidor.png)
 
 ### 2.10 Ometre Ubuntu Pro
 
@@ -320,7 +349,7 @@ Selecciona l'opció d'ometre Ubuntu Pro.
 
 No és necessari per instal·lar el sistema, actualitzar-lo ni completar les pràctiques del mòdul.
 
-<!-- IMATGE IMPRESCINDIBLE: pantalla d'Ubuntu Pro amb l'opció d'ometre seleccionada. Fitxer recomanat: imatges/12-ometre-ubuntu-pro.png -->
+![Pantalla d'Ubuntu Pro amb Skip for now seleccionat](./source/00_UbuntuServer_Images/15-server-ometre-ubuntu-pro.png)
 
 ### 2.11 Instal·lar OpenSSH
 
@@ -330,7 +359,7 @@ Marca:
 Install OpenSSH server
 ```
 
-<!-- IMATGE IMPRESCINDIBLE: pantalla de configuració SSH amb Install OpenSSH server marcat. Fitxer recomanat: imatges/13-instal·lar-openssh.png -->
+![Pantalla SSH configuration amb Instalar servidor OpenSSH marcat](./source/00_UbuntuServer_Images/16-server-instal·lar-openssh.png)
 
 No importis claus de GitHub o Launchpad en aquesta primera preparació, tret que vulguis treballar explícitament amb autenticació per claus.
 
@@ -340,7 +369,7 @@ No seleccionis serveis addicionals de la llista de snaps.
 
 Volem mantenir una base comuna i instal·lar cada servei quan en treballem la funció, la configuració i la diagnosi.
 
-<!-- IMATGE IMPRESCINDIBLE: pantalla de serveis o snaps opcionals sense cap servei addicional seleccionat. Fitxer recomanat: imatges/14-serveis-opcionals.png -->
+![Pantalla Featured server snaps sense cap servei seleccionat](./source/00_UbuntuServer_Images/17-server-serveis-opcionals.png)
 
 ### 2.13 Finalitzar i reiniciar
 
@@ -350,7 +379,13 @@ Espera que acabi la instal·lació i selecciona:
 Reboot Now
 ```
 
-<!-- IMATGE IMPRESCINDIBLE: pantalla de finalització de la instal·lació amb l'opció Reboot Now disponible. Fitxer recomanat: imatges/15-finalitzacio-reinici.png -->
+El procés passa per aquestes pantalles, en aquest ordre:
+
+![Progrés de la instal·lació del sistema](./source/00_UbuntuServer_Images/18-server-instalant-sistema.png)
+
+![Instal·lació completa, abans de seleccionar Reiniciar ahora](./source/00_UbuntuServer_Images/19-server-installacio-completa.png)
+
+![Instal·lació completa amb Reiniciar ahora seleccionat](./source/00_UbuntuServer_Images/20-server-installacio-completa-reiniciar.png)
 
 Quan ho demani:
 
@@ -358,7 +393,20 @@ Quan ho demani:
 2. Prem Enter.
 3. Espera que arrenqui el sistema instal·lat.
 
+![Avís per retirar el suport d'instal·lació abans de reiniciar](./source/00_UbuntuServer_Images/21-server-retirar-iso.png)
+
+Si prement Enter la ISO no s'expulsa sola, pots retirar-la manualment des de **Dispositivos > Unidades ópticas** i seleccionar **Remove Disk From Virtual Drive**.
+
+![Menú Dispositivos > Unidades ópticas de VirtualBox per treure la ISO manualment](./source/00_UbuntuServer_Images/22-virtualbox-treure-iso-unitat.png)
+
+> [!NOTE]
+> Si l'opció de treure el disc apareix desactivada i cap ISO està marcada, el disc virtual ja s'ha expulsat automàticament. Tanca el menú, prem Enter i espera que es reiniciï; si es queda encallat, selecciona **Máquina > Reiniciar**. No seleccionis cap ISO del menú, perquè les tornaries a inserir.
+
+![Nota amb els passos a seguir quan el disc ja s'ha expulsat automàticament](./source/00_UbuntuServer_Images/23-nota-retirada-iso.png)
+
 La instal·lació haurà acabat correctament quan arribis a la petició d'inici de sessió sense tornar a passar per l'assistent.
+
+![Arrencada del sistema instal·lat després del reinici](./source/00_UbuntuServer_Images/24-server-arrencada-post-installacio.png)
 
 Si torna a aparèixer l'instal·lador, apaga la VM, desmunta la ISO i revisa l'ordre d'arrencada.
 
@@ -372,7 +420,9 @@ Introdueix el nom d'usuari i la contrasenya creats durant la instal·lació.
 
 Quan escriguis la contrasenya no apareixeran lletres ni asteriscs. És el comportament normal del terminal.
 
-<!-- IMATGE IMPRESCINDIBLE: primer inici de sessió correcte i informació de benvinguda del servidor. No mostris la contrasenya. Fitxer recomanat: imatges/16-primer-inici-sessio.png -->
+![Prompt de login del servidor](./source/00_UbuntuServer_Images/25-server-login-prompt.png)
+
+![Sessió iniciada amb el missatge de benvinguda i la informació del sistema](./source/00_UbuntuServer_Images/26-server-login-complet.png)
 
 Comprova l'usuari:
 
@@ -404,7 +454,7 @@ Aquestes ordres permeten identificar:
 - La ruta per defecte.
 - L'espai ocupat i disponible.
 
-<!-- IMATGE IMPRESCINDIBLE: sortida inicial de whoami, hostname, ip -br a, ip route i df -h que identifiqui l'estat de partida. Fitxer recomanat: imatges/17-comprovacions-inicials.png -->
+![Sortida de whoami, hostname, pwd, ip -br a, ip route i df -h](./source/00_UbuntuServer_Images/27-server-comprovacions-inicials.png)
 
 No és necessari que totes les dades coincideixin amb les captures. Cal interpretar si corresponen a la configuració real de la màquina.
 
@@ -426,7 +476,14 @@ Aquesta ordre actualitza la informació dels paquets disponibles, però no insta
 sudo apt upgrade
 ```
 
-<!-- IMATGE IMPRESCINDIBLE: finalització correcta de l'actualització del sistema, sense errors pendents. Fitxer recomanat: imatges/18-actualitzacio-sistema.png -->
+Al terminal veuràs una seqüència semblant a aquesta:
+
+![Comanda sudo apt update && sudo apt upgrade -y](./source/00_UbuntuServer_Images/28-server-apt-update-upgrade-comanda.png)
+<!-- Aquesta captura utilitza la forma combinada amb && que s'explica més avall -->
+
+![Llistat de paquets descarregats durant sudo apt update](./source/00_UbuntuServer_Images/29-server-apt-update-llistat.png)
+
+![Actualització completada sense errors pendents](./source/00_UbuntuServer_Images/30-server-apt-upgrade-completat.png)
 
 Llegeix el resum i confirma l'operació quan ho demani.
 
@@ -462,6 +519,13 @@ ip -br a
 - **Disc ple:** consulta `df -h` i identifica quin sistema de fitxers està afectat.
 - **Configuració interrompuda:** si no hi ha cap altre gestor actiu i el diagnòstic ho indica, executa `sudo dpkg --configure -a`.
 
+És habitual que una segona execució d'`apt upgrade` no trobi res per instal·lar de seguida:
+
+![Missatge "The following upgrades have been deferred due to phasing" en un segon sudo apt upgrade](./source/00_UbuntuServer_Images/31-server-apt-upgrade-phasing.png)
+
+![Nota explicant que el missatge de phasing no és un error](./source/00_UbuntuServer_Images/32-nota-phasing-apt.png)
+<!-- Nota generada per aclarir el missatge, no forma part de la guia original -->
+
 ---
 
 ## 5. Configurar el nom del servidor
@@ -471,6 +535,9 @@ ip -br a
 ```bash
 sudo hostnamectl set-hostname srv-smx01
 ```
+
+![Nota amb la comanda hostnamectl i l'edició de /etc/hosts](./source/00_UbuntuServer_Images/33-nota-hostnamectl-hosts.png)
+<!-- Imatge extreta d'altres guies -->
 
 ### 5.2 Configurar la resolució local
 
@@ -492,7 +559,7 @@ Afegeix o adapta l'entrada del servidor:
 127.0.1.1 srv-smx01.aula.test srv-smx01
 ```
 
-<!-- IMATGE IMPRESCINDIBLE: contingut de /etc/hosts mostrant localhost intacte i l'entrada coherent del servidor. Fitxer recomanat: imatges/19-fitxer-hosts.png -->
+![Fitxer /etc/hosts editat amb l'entrada del servidor i les línies IPv6](./source/00_UbuntuServer_Images/34-server-hosts-editat.png)
 
 No eliminis les entrades necessàries d'IPv6.
 
@@ -508,6 +575,8 @@ Ctrl + X
 
 Obre una sessió nova o torna a iniciar sessió. Després executa:
 
+![Nota amb els passos per editar /etc/hosts i tornar a comprovar amb hostnamectl](./source/00_UbuntuServer_Images/35-nota-passos-hosts-hostnamectl.png)
+
 ```bash
 hostname
 hostname -f
@@ -520,7 +589,15 @@ srv-smx01
 srv-smx01.aula.test
 ```
 
-<!-- IMATGE IMPRESCINDIBLE: resultat de hostname i hostname -f després del canvi. Fitxer recomanat: imatges/20-comprovacio-hostname.png -->
+Si el teu servidor encara mostra el hostname per defecte, revisa aquesta seqüència completa. Mostra un exemple real: edició de `/etc/hosts`, comprovació amb `hostname` i persistència del nom després de reiniciar la màquina.
+
+![Fitxer /etc/hosts amb el nom actualitzat i la comanda hostname escrita](./source/00_UbuntuServer_Images/36-server-hosts-hostname-comanda.png)
+
+![Resultat de la comanda hostname després del canvi](./source/00_UbuntuServer_Images/37-server-hostname-resultat.png)
+
+![Resultat de hostname i hostname -f coincidint](./source/00_UbuntuServer_Images/38-server-hostname-f-resultat.png)
+
+![Nou inici de sessió després de reiniciar mostrant el hostname actualitzat de forma persistent](./source/00_UbuntuServer_Images/39-server-reinici-hostname-persistent.png)
 
 Editar `/etc/hosts` només crea una associació local al servidor. No configura el DNS del centre ni permet automàticament que altres equips resolguin aquest nom.
 
@@ -542,7 +619,7 @@ sudo ss -ltnp
 
 Hauries de trobar el port TCP 22 associat a SSH.
 
-<!-- IMATGE IMPRESCINDIBLE: comprovació de ssh.service, ssh.socket i del port TCP 22 en escolta. Fitxer recomanat: imatges/21-comprovacio-openssh.png -->
+![Comprovació de hostnamectl, hostname i systemctl status ssh.service ssh.socket](./source/00_UbuntuServer_Images/40-server-comprovacio-openssh.png)
 
 Ubuntu 24.04 pot activar SSH mitjançant un socket. Per això, veure únicament `ssh.service` inactiu no és suficient per concloure que SSH no funciona. Cal revisar també `ssh.socket` i els ports en escolta.
 
@@ -571,7 +648,7 @@ La segona ordre ha de retornar:
 root
 ```
 
-<!-- IMATGE IMPRESCINDIBLE: comparació entre whoami i sudo whoami per evidenciar el canvi de privilegis. Fitxer recomanat: imatges/22-comprovacio-sudo.png -->
+![Comanda sudo whoami retornant root](./source/00_UbuntuServer_Images/41-server-comprovacio-sudo.png)
 
 La contrasenya que demana `sudo` és habitualment la del compte que executa l'ordre.
 
@@ -609,6 +686,8 @@ Comprova els grups:
 id usuari2
 ```
 
+<!-- CAPTURA PDF (pàgina 34): terminal amb "sudo usermod -aG sudo usuari2" i "id usuari2" mostrant groups=...,27(sudo) -->
+
 El resultat ha d'incloure `sudo`.
 
 Inicia una sessió nova amb `usuari2` i comprova:
@@ -633,6 +712,8 @@ sudo dpkg-reconfigure keyboard-configuration
 Selecciona el model, la distribució i la variant corresponents a l'equip.
 
 <!-- IMATGE IMPRESCINDIBLE: assistent dpkg-reconfigure keyboard-configuration mostrant la distribució seleccionada. Només cal incloure-la si s'ha hagut de corregir el teclat. Fitxer recomanat: imatges/23-reconfiguracio-teclat.png -->
+<!-- CAPTURA PDF (pàgina 36): pantalla "Configuración de keyboard-configuration" amb el llistat de models de teclat -->
+<!-- CAPTURA PDF (pàgina 37): pantalles de país d'origen del teclat (Spanish ressaltat) i distribució de teclat (Spanish ressaltat) -->
 
 Comprova caràcters habituals a les ordres:
 
@@ -663,6 +744,7 @@ Interpreta especialment:
 Veure UTC no significa automàticament que el rellotge sigui incorrecte.
 
 <!-- IMATGE IMPRESCINDIBLE: sortida inicial de timedatectl amb hora local, UTC, zona horària, NTP i estat de sincronització. Fitxer recomanat: imatges/24-estat-inicial-hora.png -->
+<!-- CAPTURA PDF (pàgina 38): terminal amb "timedatectl" mostrant Time zone Etc/UTC i System clock synchronized: yes -->
 
 ### 9.2 Configurar el fus horari
 
@@ -678,6 +760,7 @@ Time zone: Europe/Madrid
 ```
 
 <!-- IMATGE IMPRESCINDIBLE: sortida de timedatectl després de configurar Europe/Madrid. Fitxer recomanat: imatges/25-fus-horari-madrid.png -->
+<!-- CAPTURA PDF (pàgina 39): terminal amb "sudo timedatectl set-timezone Europe/Madrid" i "timedatectl" mostrant Time zone Europe/Madrid (CEST, +0200) -->
 
 No ajustis manualment una hora més o menys per compensar l'horari d'estiu. La zona `Europe/Madrid` ja incorpora les regles estacionals.
 
@@ -872,6 +955,7 @@ El fitxer pot tenir noms com:
 ```
 
 <!-- IMATGE IMPRESCINDIBLE: resultat de ls -l /etc/netplan i sudo netplan get per identificar el fitxer i la configuració reals. Fitxer recomanat: imatges/29-identificacio-netplan.png -->
+<!-- CAPTURA PDF (pàgina 28): editor nano amb /etc/netplan/50-cloud-init.yaml mostrant enp0s3 amb dhcp4: true -->
 
 No obris amb Nano un nom copiat sense haver comprovat que existeix. Si el nom no existeix, podries crear un YAML buit i afegir una configuració conflictiva.
 
@@ -922,6 +1006,8 @@ network:
 ```
 
 <!-- IMATGE IMPRESCINDIBLE: fitxer YAML complet obert a l'editor, amb la indentació visible i els noms reals de les interfícies. Fitxer recomanat: imatges/30-configuracio-netplan.png -->
+<!-- CAPTURA PDF (pàgina 30): editor nano amb /etc/netplan/00-installer-config.yaml en mode estàtic (dhcp4: no, addresses 192.168.1.222/24, routes via 192.168.1.1) -->
+<!-- CAPTURA PDF (pàgina 33): exemple YAML amb enp0s3 (dhcp4: true) i enp0s8 (dhcp4: no, addresses 192.168.4.253/24) sense porta d'enllaç al segon adaptador -->
 
 Adapta `enp0s3` i `enp0s8` als noms reals.
 
@@ -968,6 +1054,7 @@ sudo netplan try
 ```
 
 <!-- IMATGE IMPRESCINDIBLE: prova de Netplan pendent de confirmació, mostrant el mecanisme de reversió temporal. Fitxer recomanat: imatges/32-netplan-try.png -->
+<!-- CAPTURA PDF (pàgina 31): terminal amb "sudo netplan apply" i "sudo netplan ip leases enp0s3" mostrant ADDRESS, NETMASK, ROUTER i DNS assignats per DHCP -->
 
 Confirma dins del termini només si la configuració funciona.
 
