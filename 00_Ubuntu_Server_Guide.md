@@ -711,9 +711,9 @@ sudo dpkg-reconfigure keyboard-configuration
 
 Selecciona el model, la distribució i la variant corresponents a l'equip.
 
-<!-- IMATGE IMPRESCINDIBLE: assistent dpkg-reconfigure keyboard-configuration mostrant la distribució seleccionada. Només cal incloure-la si s'ha hagut de corregir el teclat. Fitxer recomanat: imatges/23-reconfiguracio-teclat.png -->
-<!-- CAPTURA PDF (pàgina 36): pantalla "Configuración de keyboard-configuration" amb el llistat de models de teclat -->
-<!-- CAPTURA PDF (pàgina 37): pantalles de país d'origen del teclat (Spanish ressaltat) i distribució de teclat (Spanish ressaltat) -->
+![Assistent de `keyboard-configuration` amb el país del teclat seleccionat en Spanish](./source/00_UbuntuServer_Images/Captura%20de%20pantalla%202026-09-17%20100601.png)
+
+![Assistent de `keyboard-configuration` amb la distribució del teclat seleccionada en Spanish](./source/00_UbuntuServer_Images/Captura%20de%20pantalla%202026-09-17%20100915.png)
 
 Comprova caràcters habituals a les ordres:
 
