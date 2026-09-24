@@ -21,13 +21,15 @@ El procediment segueix la presentació `GUIA UBUNTU SERVER` i incorpora els acla
 10. [Gestionar els permisos administratius](#7-gestionar-els-permisos-administratius)
 11. [Configurar el teclat](#8-configurar-el-teclat)
 12. [Configurar la data i l'hora](#9-configurar-la-data-i-lhora)
-13. [Afegir una segona interfície](#10-afegir-una-segona-interfície)
+13. [Entendre i afegir una segona interfície](#10-entendre-i-afegir-una-segona-interfície)
 14. [Configurar Netplan](#11-configurar-netplan)
 15. [Validar la màquina base](#12-validar-la-màquina-base)
 16. [Crear una instantània](#13-crear-una-instantània)
 17. [Protocol de diagnosi](#protocol-general-de-diagnosi)
 18. [Errors freqüents](#errors-freqüents)
-19. [Estructura proposada del repositori](#estructura-proposada-del-repositori)
+19. [Preparar l'escenari servidor-client](#14-preparar-lescenari-servidor-client)
+20. [Crear i validar l'OVA](#15-crear-i-validar-lova-de-la-màquina-base)
+21. [Estructura proposada del repositori](#estructura-proposada-del-repositori)
 
 ## Resultat final
 
@@ -43,8 +45,11 @@ En completar la guia tindrem:
 - [ ] Sincronització de l'hora activada.
 - [ ] Una interfície NAT amb DHCP per a Internet.
 - [ ] Una interfície de xarxa interna amb IP estàtica per al laboratori.
+- [ ] Relació documentada entre adaptadors de VirtualBox, interfícies d'Ubuntu i adreces MAC.
 - [ ] Configuració persistent després de reiniciar.
 - [ ] Instantània d'una base funcional abans d'instal·lar altres serveis.
+- [ ] Fitxer OVA de la base exportat i comprovat mitjançant una importació de prova.
+- [ ] Disseny preparat per connectar el servidor amb un client Zorin OS a `SMX-LAB`.
 
 La configuració de xarxa final proposada és:
 
@@ -75,6 +80,7 @@ Els valors següents s'utilitzen com a proposta comuna:
 | Nom de la xarxa interna | `SMX-LAB` |
 | Xarxa interna del laboratori | `192.168.50.0/24` |
 | IP del servidor a la xarxa interna | `192.168.50.10/24` |
+| IP proposada per al client Zorin | `192.168.50.20/24` |
 | Fus horari | `Europe/Madrid` |
 
 Cal distingir tres noms diferents:
@@ -696,52 +702,162 @@ Activar NTP no demostra que la sincronització sigui immediata. Cal verificar l'
 
 ---
 
-## 10. Afegir una segona interfície
+## 10. Entendre i afegir una segona interfície
 
-La segona interfície separarà la connexió exterior de la xarxa de pràctiques.
+A partir d'aquest punt, la xarxa és una part central de la pràctica. No n'hi ha prou amb copiar una IP: cal saber quin adaptador virtual, quina interfície d'Ubuntu i quina adreça MAC intervenen en cada connexió.
 
-### 10.1 Apagar correctament el servidor
+La segona interfície separarà dues funcions:
+
+- **Sortida exterior:** actualitzacions i descàrregues a través de NAT.
+- **Xarxa de laboratori:** comunicació controlada amb clients i altres servidors a través de `SMX-LAB`.
+
+### 10.1 Distingir les peces de la xarxa
+
+| Element | On existeix | Què representa |
+|---|---|---|
+| Targeta de xarxa física | Equip amfitrió | Maquinari real que connecta l'ordinador per Ethernet o Wi-Fi. |
+| Adaptador de xarxa virtual | VirtualBox | Dispositiu simulat que VirtualBox presenta a la VM. |
+| Mode de connexió | VirtualBox | Indica a quina xarxa s'enganxa l'adaptador virtual. |
+| Interfície de xarxa | Ubuntu Server | Nom amb què el sistema operatiu veu l'adaptador, per exemple `enp0s3`. |
+| Adreça MAC | Adaptador/interfície | Identificador de capa 2 de 48 bits, escrit habitualment amb sis parelles hexadecimals. |
+| Adreça IP i prefix | Ubuntu Server | Identificador lògic dins d'una xarxa, per exemple `192.168.50.10/24`. |
+| Passarel·la per defecte | Taula de rutes | Destí utilitzat per arribar a xarxes no connectades directament. |
+| DNS | Sistema operatiu | Servei que tradueix noms, com `ubuntu.com`, a adreces IP. |
+
+La relació habitual és:
+
+```text
+Adaptador de VirtualBox -> adreça MAC -> interfície d'Ubuntu -> configuració IP
+```
+
+No pressuposis que l'Adaptador 1 sempre serà `enp0s3`. La forma fiable de relacionar-los és comparar les adreces MAC.
+
+<!-- IMATGE IMPRESCINDIBLE: vista de la configuració avançada d'un adaptador de VirtualBox on es vegi el mode de xarxa, el tipus d'adaptador, l'adreça MAC i el cable connectat. Fitxer recomanat: imatges/26a-elements-adaptador-virtualbox.png -->
+
+### 10.2 Conèixer els modes de xarxa de VirtualBox
+
+| Mode | Comunicació principal | Internet per defecte | Ús habitual al laboratori |
+|---|---|---:|---|
+| NAT | VM cap a l'exterior | Sí | Instal·lar paquets i actualitzar una VM de manera senzilla. |
+| Xarxa NAT | VM amb altres VM de la mateixa xarxa NAT i amb l'exterior | Sí | Diverses VM que s'han de veure i també sortir a Internet. |
+| Adaptador pont | VM connectada a la mateixa xarxa física que l'amfitrió | Depèn de la xarxa real | Integrar la VM a una LAN real; requereix permís i control de la xarxa. |
+| Xarxa interna | Només VM amb el mateix nom de xarxa interna | No | Laboratori aïllat servidor-client. |
+| Adaptador només amfitrió | VM i equip amfitrió dins d'una xarxa privada | No, tret que es configuri encaminament | Administrar VM des de l'amfitrió sense exposar-les a la LAN. |
+| No connectat | Cap xarxa | No | Simular un cable desconnectat o diagnosticar fallades. |
+
+> [!IMPORTANT]
+> **NAT** i **Xarxa NAT** no són el mateix. Amb el NAT individual, dues VM poden rebre la mateixa IP virtual i, tot i això, estar en xarxes NAT separades. Per a les pràctiques servidor-client utilitzarem una xarxa interna comuna anomenada `SMX-LAB`.
+
+<!-- IMATGE IMPRESCINDIBLE: desplegable de VirtualBox amb els modes de connexió disponibles i el mode Xarxa interna seleccionat per a l'Adaptador 2. Fitxer recomanat: imatges/26b-modes-xarxa-virtualbox.png -->
+
+### 10.3 Planificar els dos adaptadors
+
+| Adaptador | Mode | Configuració prevista | Passarel·la | Funció |
+|---|---|---|---|---|
+| 1 | NAT | DHCP | La proporciona el NAT | Sortida a Internet. |
+| 2 | Xarxa interna `SMX-LAB` | `192.168.50.10/24` | Cap | Comunicació amb el laboratori. |
+
+Només l'Adaptador 1 ha d'aportar la ruta per defecte. Si també s'afegeix una passarel·la a la xarxa interna, el servidor pot tenir dues sortides candidates i prendre decisions de ruta no desitjades.
+
+### 10.4 Apagar correctament el servidor
 
 ```bash
 sudo poweroff
 ```
 
-### 10.2 Configurar VirtualBox
+Espera que VirtualBox indiqui que la màquina està **apagada**, no només pausada ni amb l'estat desat.
+
+### 10.5 Configurar VirtualBox
 
 Amb la VM apagada:
 
 1. Entra a **Configuració > Xarxa**.
-2. Mantén l'Adaptador 1 en NAT.
-3. Activa l'Adaptador 2.
-4. Selecciona **Xarxa interna**.
-5. Escriu com a nom de xarxa `SMX-LAB`.
-6. Confirma que el cable virtual estigui connectat.
-7. Torna a iniciar la màquina.
+2. Mantén l'Adaptador 1 activat en mode **NAT**.
+3. Obre **Avançat**, comprova **Cable connectat** i anota la seva adreça MAC.
+4. Activa l'Adaptador 2.
+5. Selecciona **Xarxa interna**.
+6. Escriu exactament `SMX-LAB` com a nom de xarxa.
+7. Obre **Avançat**, comprova **Cable connectat** i anota la MAC de l'Adaptador 2.
+8. Confirma que les dues MAC siguin diferents.
+9. Torna a iniciar la màquina.
 
 <!-- IMATGE IMPRESCINDIBLE: configuració de VirtualBox mostrant l'Adaptador 1 en NAT i l'Adaptador 2 a la xarxa interna SMX-LAB. Fitxer recomanat: imatges/27-dos-adaptadors-virtualbox.png -->
 
-Totes les VM que s'hagin de comunicar dins del laboratori han d'utilitzar exactament el mateix nom de xarxa interna.
+Totes les VM que s'hagin de comunicar dins del laboratori han d'utilitzar exactament el mateix nom de xarxa interna. `SMX-LAB`, `smx-lab` i `SMX_LAB` no s'han de considerar noms intercanviables.
 
-### 10.3 Identificar les interfícies
+### 10.6 Identificar les interfícies i les MAC a Ubuntu
+
+Executa:
 
 ```bash
 ip -br link
 ip -br a
+ip link show
 ```
 
-És habitual trobar noms com `enp0s3` i `enp0s8`, però poden ser diferents.
+És habitual trobar noms com `enp0s3` i `enp0s8`, però poden ser diferents. `ip -br link` mostra l'estat de l'enllaç i `ip -br a` afegeix les adreces IP assignades.
 
-Si tens dubtes, compara les adreces MAC mostrades per Ubuntu amb les configurades a VirtualBox.
+Per consultar només la MAC d'una interfície concreta, substitueix el nom de l'exemple pel nom real:
+
+```bash
+cat /sys/class/net/enp0s3/address
+cat /sys/class/net/enp0s8/address
+```
+
+VirtualBox pot mostrar la MAC sense separadors i amb majúscules. Ubuntu acostuma a mostrar-la amb dos punts i minúscules. Per exemple, `080027A1B2C3` i `08:00:27:a1:b2:c3` representen la mateixa adreça.
 
 <!-- IMATGE IMPRESCINDIBLE: sortida de ip -br link i ip -br a mostrant les dues interfícies detectades. Fitxer recomanat: imatges/28-identificacio-interficies.png -->
 
-Tenir dues interfícies no converteix automàticament Ubuntu en un encaminador i tampoc activa NAT dins del servidor.
+<!-- IMATGE IMPRESCINDIBLE: correspondència demostrada entre les MAC dels dos adaptadors a VirtualBox i les MAC de les interfícies mostrades amb ip link show o /sys/class/net. Fitxer recomanat: imatges/28a-correspondencia-adaptadors-mac.png -->
+
+Completa aquest inventari amb els valors reals de la teva VM:
+
+| Adaptador de VirtualBox | Mode | MAC a VirtualBox | Interfície a Ubuntu | IP prevista |
+|---|---|---|---|---|
+| Adaptador 1 | NAT | `_________________` | `_________________` | DHCP |
+| Adaptador 2 | Xarxa interna `SMX-LAB` | `_________________` | `_________________` | `192.168.50.10/24` |
+
+### 10.7 Entendre què aporta la MAC
+
+- Cada adaptador virtual activat té la seva pròpia MAC.
+- La MAC identifica la interfície dins del mateix segment de capa 2; no substitueix l'adreça IP.
+- Els equips aprenen quina MAC correspon a una IP veïna mitjançant ARP. La informació apresa es pot consultar amb `ip neigh`.
+- Dues màquines amb la mateixa MAC a la mateixa xarxa poden provocar comunicacions intermitents o entrades de veïns incorrectes.
+- En clonar o importar una OVA per crear diverses VM, s'han de generar MAC noves.
+- Una MAC no és una contrasenya ni una dada secreta, però continua sent una dada tècnica que cal documentar correctament.
+
+Després que hi hagi un altre equip actiu a `SMX-LAB`, podràs comprovar la taula de veïns amb:
+
+```bash
+ip neigh
+```
+
+Si encara no has enviat trànsit a cap altre equip de la xarxa interna, és normal que no hi aparegui cap veí d'aquesta xarxa.
+
+Tenir dues interfícies no converteix automàticament Ubuntu en un encaminador i tampoc activa NAT dins del servidor. En aquesta guia cada interfície només farà la funció definida a la taula anterior.
 
 ---
 
 ## 11. Configurar Netplan
 
-### 11.1 Identificar el fitxer existent
+Netplan descriu la configuració persistent de xarxa en fitxers YAML i genera la configuració que aplicarà el gestor de xarxa del sistema. El procés segur és sempre el mateix: observar, fer còpia, editar, validar, provar, aplicar i tornar a comprovar.
+
+### 11.1 Registrar l'estat abans del canvi
+
+Abans de modificar res, desa o captura l'estat actual:
+
+```bash
+ip -br link
+ip -br a
+ip route
+resolvectl status
+```
+
+Anota quin nom i quina MAC corresponen a cada adaptador. Aquesta evidència permet comparar l'abans i el després i recuperar-se d'una configuració incorrecta.
+
+<!-- IMATGE IMPRESCINDIBLE: estat de xarxa abans de modificar Netplan, amb les interfícies, les MAC, les adreces i la ruta per defecte identificables. Fitxer recomanat: imatges/28b-estat-xarxa-abans-netplan.png -->
+
+### 11.2 Identificar el fitxer existent
 
 ```bash
 ls -l /etc/netplan
@@ -761,7 +877,7 @@ No obris amb Nano un nom copiat sense haver comprovat que existeix. Si el nom no
 
 Netplan pot combinar diversos fitxers YAML. Cal inspeccionar-los si la configuració aplicada no coincideix amb el fitxer editat.
 
-### 11.2 Fer una còpia de seguretat
+### 11.3 Fer una còpia de seguretat
 
 ```bash
 sudo cp -a /etc/netplan /root/netplan-abans-canvi
@@ -775,7 +891,14 @@ ls -l /etc/netplan
 
 Habitualment, els fitxers de configuració han de pertànyer a root i tenir permisos restrictius, com ara `600`.
 
-### 11.3 Editar el fitxer real
+Si el fitxer editat té permisos massa oberts, ajusta'ls substituint el nom pel fitxer real:
+
+```bash
+sudo chown root:root /etc/netplan/00-installer-config.yaml
+sudo chmod 600 /etc/netplan/00-installer-config.yaml
+```
+
+### 11.4 Editar el fitxer real
 
 Substitueix el nom de l'exemple pel fitxer que existeixi a la teva màquina:
 
@@ -788,6 +911,7 @@ Exemple de configuració:
 ```yaml
 network:
   version: 2
+  renderer: networkd
   ethernets:
     enp0s3:
       dhcp4: true
@@ -803,6 +927,8 @@ Adapta `enp0s3` i `enp0s8` als noms reals.
 
 Aquesta configuració estableix:
 
+- `version: 2`: versió de l'esquema de configuració de Netplan.
+- `renderer: networkd`: el sistema delega la xarxa a `systemd-networkd`, habitual a Ubuntu Server.
 - Primera interfície per DHCP mitjançant NAT.
 - Segona interfície amb IP estàtica `192.168.50.10/24`.
 - Una única ruta de sortida, proporcionada pel NAT.
@@ -815,7 +941,7 @@ Utilitza espais i no tabuladors. La indentació forma part de la sintaxi YAML.
 > [!NOTE]
 > Abans d'utilitzar `192.168.50.0/24`, comprova que no se superposi amb una altra xarxa del teu entorn.
 
-### 11.4 Validar la sintaxi
+### 11.5 Validar la sintaxi
 
 ```bash
 sudo netplan generate
@@ -833,7 +959,7 @@ Si hi ha un error amb número de línia, revisa:
 - El nom exacte de les propietats.
 - L'absència de tabuladors.
 
-### 11.5 Provar la configuració
+### 11.6 Provar la configuració
 
 Des de la consola de VirtualBox:
 
@@ -853,10 +979,11 @@ sudo netplan apply
 
 Mantén disponible la consola de VirtualBox. Un canvi incorrecte pot interrompre una sessió SSH.
 
-### 11.6 Comprovar les adreces
+### 11.7 Comprovar les adreces i l'estat de Netplan
 
 ```bash
 ip -br a
+sudo netplan status --all
 ```
 
 Hauries de veure:
@@ -866,17 +993,18 @@ Hauries de veure:
 
 <!-- IMATGE IMPRESCINDIBLE: sortida final de ip -br a mostrant la IP DHCP del NAT i la IP estàtica de la xarxa interna. Fitxer recomanat: imatges/33-adreces-finals.png -->
 
-### 11.7 Comprovar les rutes
+### 11.8 Comprovar les rutes
 
 ```bash
 ip route
+ip route get 1.1.1.1
 ```
 
-La ruta per defecte ha de correspondre a la interfície NAT. En aquesta base simplifiquem la configuració a una única sortida principal.
+La ruta per defecte i el resultat d'`ip route get 1.1.1.1` han de correspondre a la interfície NAT. La xarxa `192.168.50.0/24` ha d'aparèixer com a xarxa connectada directament a la interfície interna. En aquesta base simplifiquem la configuració a una única sortida principal.
 
 <!-- IMATGE IMPRESCINDIBLE: sortida de ip route amb una única ruta per defecte associada a la interfície NAT. Fitxer recomanat: imatges/34-rutes-finals.png -->
 
-### 11.8 Comprovar el DNS
+### 11.9 Comprovar el DNS
 
 ```bash
 resolvectl status
@@ -885,21 +1013,43 @@ getent hosts ubuntu.com
 
 <!-- IMATGE IMPRESCINDIBLE: comprovació funcional del DNS mitjançant resolvectl status i getent hosts. Fitxer recomanat: imatges/35-comprovacio-dns.png -->
 
-### 11.9 Fer proves de connectivitat
+### 11.10 Fer proves de connectivitat per capes
 
-Prova connectivitat per IP:
+1. Comprova la ruta que utilitzarà el sistema:
+
+```bash
+ip route get 1.1.1.1
+```
+
+2. Prova connectivitat exterior per IP:
 
 ```bash
 ping -c 4 1.1.1.1
 ```
 
-Prova resolució de noms:
+3. Prova la resolució de noms:
+
+```bash
+getent hosts ubuntu.com
+```
+
+4. Prova el nom i la connectivitat exterior conjuntament:
 
 ```bash
 ping -c 4 ubuntu.com
 ```
 
 Un ping fallit no demostra per si sol que un servei sigui inaccessible, perquè ICMP pot estar filtrat. Cal provar també el servei concret que es necessita.
+
+Quan existeixi el client Zorin amb IP `192.168.50.20/24`, completa la validació interna amb:
+
+```bash
+ip route get 192.168.50.20
+ping -c 4 192.168.50.20
+ip neigh
+```
+
+La ruta cap a `192.168.50.20` ha d'utilitzar directament la interfície de `SMX-LAB`, sense passar per la passarel·la NAT.
 
 ### Errors habituals de Netplan
 
@@ -944,7 +1094,11 @@ srv-smx01.aula.test
 ```bash
 ip -br link
 ip -br a
+ip link show
+sudo netplan status --all
 ```
+
+Compara les MAC amb l'inventari de l'apartat 10 i confirma que cada IP s'ha aplicat a la interfície prevista.
 
 ### 12.4 Rutes i DNS
 
@@ -986,6 +1140,7 @@ Després del reinici, repeteix:
 ```bash
 hostname
 hostname -f
+ip -br link
 ip -br a
 ip route
 resolvectl status
@@ -1005,6 +1160,7 @@ La base només es dona per acabada si les configuracions pertinents es conserven
 - [ ] `hostname -f` retorna `srv-smx01.aula.test`.
 - [ ] La interfície NAT obté una IP per DHCP.
 - [ ] La interfície interna conserva `192.168.50.10/24`.
+- [ ] Cada adaptador està relacionat amb la interfície correcta mitjançant la seva MAC.
 - [ ] Només hi ha una ruta per defecte per a aquesta configuració base.
 - [ ] La resolució de noms funciona.
 - [ ] SSH escolta al port previst.
@@ -1074,38 +1230,70 @@ Quan alguna cosa no funcioni, evita modificar diversos elements alhora. Primer c
 - Quin missatge exacte has obtingut?
 - Quin ha estat l'últim canvi?
 
-### 2. Revisar VirtualBox
+### 2. Revisar la xarxa virtual
 
 Comprova:
 
-- Mode de xarxa.
-- Adaptador activat.
-- Cable virtual connectat.
-- Nom de la xarxa interna.
+- Quin adaptador s'està revisant.
+- Mode de xarxa assignat a l'adaptador.
+- Adaptador activat i cable virtual connectat.
+- Nom exacte de la xarxa interna.
+- Adreça MAC anotada per a aquell adaptador.
 - Adaptador físic seleccionat si s'utilitza mode pont.
 
-### 3. Revisar l'enllaç i les adreces
+Si dues VM han de comunicar-se per xarxa interna, totes dues han d'estar connectades a una xarxa amb el mateix nom.
+
+### 3. Revisar l'enllaç i la MAC
 
 ```bash
 ip -br link
-ip -br a
+ip link show
 ```
 
 Identifica:
 
 - Quina interfície correspon a cada adaptador.
-- Si està activa.
-- Si té una IP adequada per a la xarxa connectada.
+- Si l'estat administratiu és `UP`.
+- Si hi ha enllaç detectat.
+- Si la MAC coincideix amb la de VirtualBox.
 
-### 4. Revisar les rutes
+Una interfície pot existir però continuar sense enllaç si el cable virtual està desconnectat. També pot estar enllaçada però no tenir cap IP; són problemes diferents.
+
+### 4. Revisar les adreces i els prefixos
+
+```bash
+ip -br a
+sudo netplan status --all
+```
+
+Comprova que:
+
+- La IP està assignada a la interfície correcta.
+- El prefix és l'esperat; en aquest laboratori, `/24`.
+- Servidor i client comparteixen xarxa: `192.168.50.10/24` i `192.168.50.20/24`.
+- No hi ha una IP estàtica duplicada en una altra VM.
+
+### 5. Revisar els veïns de capa 2
+
+Després d'intentar contactar amb l'altre equip:
+
+```bash
+ip neigh
+```
+
+Una entrada `FAILED` o `INCOMPLETE` indica que el sistema no ha pogut descobrir la MAC corresponent a la IP veïna. Revisa especialment el nom de la xarxa interna, el cable virtual, la IP, el prefix, la MAC duplicada i si l'altra VM està encesa.
+
+### 6. Revisar les rutes
 
 ```bash
 ip route
+ip route get 1.1.1.1
+ip route get 192.168.50.20
 ```
 
-Determina si el destí és local o necessita una passarel·la.
+Determina si el destí és local o necessita una passarel·la. La sortida cap a Internet ha d'utilitzar el NAT; el client `192.168.50.20` ha de ser accessible directament per la interfície interna.
 
-### 5. Revisar la resolució
+### 7. Revisar la resolució de noms
 
 ```bash
 resolvectl status
@@ -1114,25 +1302,43 @@ getent hosts ubuntu.com
 
 Si es pot arribar a una IP però no a un nom, el problema probablement es troba en la resolució.
 
-### 6. Revisar el servei
+### 8. Provar la connectivitat en ordre
+
+```bash
+ping -c 4 192.168.50.20
+ping -c 4 1.1.1.1
+getent hosts ubuntu.com
+```
+
+Interpreta cada prova per separat:
+
+- Falla el client intern: revisa `SMX-LAB`, les IP, els prefixos i les MAC.
+- Funciona la xarxa interna però falla `1.1.1.1`: revisa NAT i la ruta per defecte.
+- Funciona `1.1.1.1` però falla el nom: revisa DNS.
+
+<!-- IMATGE IMPRESCINDIBLE: diagnosi ordenada amb ip -br link, ip -br a, ip route, ip neigh i una prova de connectivitat; s'han de poder relacionar interfície, MAC, IP i ruta. Fitxer recomanat: imatges/37a-diagnosi-xarxa-per-capes.png -->
+
+### 9. Revisar el servei
 
 ```bash
 systemctl status NOM_SERVEI --no-pager
 ```
 
-### 7. Revisar els ports
+### 10. Revisar els ports
 
 ```bash
 sudo ss -ltnp
 ```
 
-### 8. Revisar els registres
+Que la xarxa respongui no garanteix que el servei estigui iniciat ni que escolti a l'adreça o al port correctes.
+
+### 11. Revisar els registres
 
 ```bash
 journalctl -u NOM_SERVEI -b --no-pager -n 50
 ```
 
-### 9. Documentar la resolució
+### 12. Documentar la resolució
 
 Registra:
 
@@ -1143,6 +1349,8 @@ Registra:
 5. Resultat obtingut.
 6. Solució aplicada.
 7. Comprovació final.
+
+Després de cada canvi, repeteix exactament la prova que havia fallat. Si canvies alhora VirtualBox, Netplan, el servei i el tallafoc, no podràs saber quin canvi ha resolt o empitjorat el problema.
 
 ---
 
@@ -1187,6 +1395,30 @@ En NAT individual poden tenir la mateixa IP virtual sense conflicte perquè es t
 
 El NAT individual no crea automàticament una xarxa comuna. Utilitza una mateixa xarxa NAT o una mateixa xarxa interna segons l'objectiu.
 
+### Les dues VM tenen IP del mateix rang però no es veuen
+
+Comprova que:
+
+- Totes dues utilitzen exactament la mateixa xarxa interna, `SMX-LAB`.
+- Els cables virtuals estan connectats.
+- Les interfícies estan `UP`.
+- Les IP són diferents i els prefixos coincideixen.
+- No hi ha MAC duplicades.
+
+Després d'un intent de `ping`, consulta `ip neigh` per saber si s'ha pogut descobrir la MAC de l'altre equip.
+
+### No sé quina interfície correspon a cada adaptador
+
+No ho dedueixis només pel nom `enp0s3` o `enp0s8`. Compara la MAC mostrada a **VirtualBox > Configuració > Xarxa > Avançat** amb la sortida de:
+
+```bash
+ip link show
+```
+
+### Una màquina importada té problemes de xarxa intermitents
+
+Comprova que no comparteixi MAC ni IP estàtica amb la màquina original. En importar l'OVA per crear una VM nova, genera adreces MAC noves i assigna a cada equip un hostname i una IP únics.
+
 ### Netplan no aplica el fitxer modificat
 
 Comprova:
@@ -1229,6 +1461,274 @@ No canviïs el rellotge manualment abans de distingir entre:
 
 ---
 
+## 14. Preparar l'escenari servidor-client
+
+Les pràctiques posteriors combinaran habitualment un servidor sense entorn gràfic i un client d'escriptori. Es recomana **Zorin OS** com a client perquè ofereix un entorn gràfic accessible i permet treballar amb eines compatibles amb la família Ubuntu.
+
+### 14.1 Dissenyar la topologia
+
+Les dues VM tindran dos adaptadors, però cada adaptador complirà una funció concreta:
+
+| Màquina | Adaptador 1 | Adaptador 2 | IP a `SMX-LAB` | Funció |
+|---|---|---|---|---|
+| Ubuntu Server | NAT amb DHCP | Xarxa interna `SMX-LAB` | `192.168.50.10/24` | Oferir els serveis. |
+| Zorin OS | NAT amb DHCP | Xarxa interna `SMX-LAB` | `192.168.50.20/24` | Consumir, provar i administrar els serveis. |
+
+En tots dos equips:
+
+- L'Adaptador 1 permet actualitzar i instal·lar paquets.
+- L'Adaptador 2 permet la comunicació privada del laboratori.
+- La passarel·la per defecte correspon únicament a l'Adaptador 1.
+- La interfície interna no necessita passarel·la ni DNS mentre només s'utilitzi per al mateix segment.
+
+<!-- IMATGE IMPRESCINDIBLE: evidència de la topologia servidor-client; han de veure's els dos adaptadors de l'Ubuntu Server i del client Zorin, amb l'Adaptador 2 de totes dues VM connectat exactament a SMX-LAB. Fitxer recomanat: imatges/38-topologia-servidor-client-virtualbox.png -->
+
+### 14.2 Crear el client Zorin
+
+Quan la pràctica requereixi el client:
+
+1. Descarrega la ISO de Zorin OS des del web oficial.
+2. Crea una VM nova anomenada, per exemple, `ZorinClient_BASE`.
+3. Assigna recursos adequats a l'equip disponible; com a punt de partida, 4 GB de RAM i 25 GB de disc dinàmic.
+4. Mantén inicialment un únic adaptador NAT.
+5. Instal·la Zorin OS al disc virtual.
+6. Reinicia, retira la ISO i instal·la les actualitzacions.
+7. Apaga completament el client.
+8. Mantén l'Adaptador 1 en NAT.
+9. Activa l'Adaptador 2 en mode **Xarxa interna** i selecciona `SMX-LAB`.
+10. Anota les MAC de tots dos adaptadors abans d'arrencar.
+
+No connectis el client a una xarxa interna amb un nom diferent, encara que tingui una IP del rang `192.168.50.0/24`.
+
+<!-- IMATGE IMPRESCINDIBLE: configuració de xarxa del client Zorin a VirtualBox amb Adaptador 1 en NAT, Adaptador 2 a SMX-LAB, cables connectats i MAC visibles. Fitxer recomanat: imatges/39-adaptadors-client-zorin.png -->
+
+### 14.3 Identificar les interfícies del client
+
+Obre un terminal a Zorin i executa:
+
+```bash
+ip -br link
+ip -br a
+ip link show
+nmcli device status
+```
+
+Compara les MAC amb VirtualBox i determina quina interfície correspon a NAT i quina a `SMX-LAB`. No configuris la IP fins que aquesta relació sigui inequívoca.
+
+### 14.4 Configurar la IP interna a Zorin
+
+Des de la configuració gràfica de xarxa de Zorin:
+
+1. Obre **Configuració > Xarxa**.
+2. Selecciona la connexió cablejada que correspon a l'Adaptador 2; comprova'n la MAC.
+3. Obre les opcions de la connexió.
+4. A **IPv4**, canvia el mètode a **Manual**.
+5. Escriu l'adreça `192.168.50.20`.
+6. Escriu la màscara `255.255.255.0`, equivalent a `/24`.
+7. Deixa la passarel·la buida.
+8. Deixa el DNS buit per a aquesta connexió interna.
+9. Desa els canvis.
+10. Desconnecta i torna a connectar la connexió, o reinicia el client.
+
+Els noms exactes dels menús poden variar lleugerament segons la versió de Zorin, però els valors de xarxa han de ser els indicats.
+
+Comprova el resultat:
+
+```bash
+ip -br a
+ip route
+nmcli device status
+```
+
+<!-- IMATGE IMPRESCINDIBLE: configuració IPv4 manual de la interfície interna del client Zorin amb 192.168.50.20/24, sense passarel·la i sense DNS. Fitxer recomanat: imatges/40-ip-estatica-client-zorin.png -->
+
+### 14.5 Validar la comunicació servidor-client
+
+Amb les dues VM enceses, des de Zorin:
+
+```bash
+ping -c 4 192.168.50.10
+ssh NOM_USUARI_SERVIDOR@192.168.50.10
+```
+
+Substitueix `NOM_USUARI_SERVIDOR` pel compte real d'Ubuntu Server. La primera connexió SSH pot demanar confirmar l'empremta del servidor; comprova que el destí sigui correcte abans d'acceptar-la.
+
+Des d'Ubuntu Server:
+
+```bash
+ping -c 4 192.168.50.20
+ip neigh
+```
+
+La taula de veïns hauria de relacionar la IP del client amb la MAC de la seva interfície interna. Compara-la amb l'inventari de VirtualBox.
+
+<!-- IMATGE IMPRESCINDIBLE: prova completa des de Zorin amb ping correcte a 192.168.50.10 i inici de sessió SSH al servidor; no mostris cap contrasenya. Fitxer recomanat: imatges/41-prova-zorin-ping-ssh.png -->
+
+<!-- IMATGE IMPRESCINDIBLE: sortida d'ip neigh al servidor mostrant 192.168.50.20 associada a la MAC interna correcta del client Zorin. Fitxer recomanat: imatges/42-veinat-servidor-client.png -->
+
+La topologia queda validada si:
+
+- [ ] Tots dos equips tenen Internet mitjançant els seus adaptadors NAT.
+- [ ] El servidor conserva `192.168.50.10/24` a `SMX-LAB`.
+- [ ] El client conserva `192.168.50.20/24` a `SMX-LAB`.
+- [ ] Només el NAT aporta la ruta per defecte a cada equip.
+- [ ] El ping intern funciona en tots dos sentits.
+- [ ] Zorin pot iniciar una sessió SSH al servidor per la IP interna.
+- [ ] Les IP, les interfícies i les MAC estan documentades.
+
+---
+
+## 15. Crear i validar l'OVA de la màquina base
+
+L'última operació de la preparació és exportar la màquina base com a **OVA**. El fitxer OVA empaqueta la definició de la VM i els seus discos virtuals en un únic arxiu transportable, però només serà fiable si després se'n comprova la importació.
+
+### 15.1 Diferenciar instantània, clon i OVA
+
+| Recurs | On queda | Ús principal | Limitació principal |
+|---|---|---|---|
+| Instantània | Associada a la VM original | Tornar ràpidament a un estat anterior. | Depèn dels fitxers de la VM original. |
+| Clon | Nova VM dins de VirtualBox | Crear una còpia de treball al mateix entorn. | No és el format més pràctic per transportar o arxivar. |
+| OVA | Fitxer independent | Distribuir, importar o conservar una màquina virtual. | Pot copiar hostname, IP i altres identificadors que després caldrà personalitzar. |
+
+Una instantània no substitueix una OVA, i una OVA no substitueix les còpies de seguretat de les dades que es generin durant el curs.
+
+### 15.2 Preparar la base abans d'exportar
+
+1. Inicia només la màquina base original.
+2. Instal·la les actualitzacions pendents:
+
+   ```bash
+   sudo apt update
+   sudo apt upgrade
+   ```
+
+3. Revisa que no hi hagi cap contrasenya, clau privada, token o fitxer personal que no s'hagi de distribuir.
+4. Repeteix la validació de l'apartat 12.
+5. Comprova localment l'identificador de la instal·lació per poder detectar còpies duplicades:
+
+   ```bash
+   cat /etc/machine-id
+   ```
+
+   No publiquis el valor complet de `machine-id` al repositori ni el deixis visible a les captures.
+
+6. Apaga correctament la VM:
+
+   ```bash
+   sudo poweroff
+   ```
+
+7. A VirtualBox, comprova que la ISO ja no estigui muntada a la unitat òptica.
+8. Confirma que l'estat de la VM sigui **Apagada**, no **Desada**.
+9. Conserva la instantània `00_BASE_UBUNTU_SERVER_24_04` creada anteriorment.
+
+> [!IMPORTANT]
+> L'OVA conserva la configuració del sistema convidat. Si s'importen diverses còpies, el hostname, la IP estàtica i altres identificadors poden quedar duplicats. La política de MAC de la importació i la personalització posterior són obligatòries abans d'executar diverses còpies a la mateixa xarxa.
+
+<!-- IMATGE IMPRESCINDIBLE: màquina base apagada a VirtualBox, amb la instantània creada i sense la ISO d'instal·lació muntada. Fitxer recomanat: imatges/43-base-preparada-exportacio-ova.png -->
+
+### 15.3 Exportar l'aplicació virtual
+
+Amb la VM apagada:
+
+1. Obre l'opció **Fitxer > Exporta una aplicació virtual** de VirtualBox. Segons la versió, també pot aparèixer dins de l'eina **Aplicacions**.
+2. Selecciona únicament `UbuntuServer24.04_BASE`.
+3. Tria el format **Open Virtualization Format 2.0** si està disponible.
+4. Selecciona un fitxer de sortida amb un nom clar, per exemple:
+
+   ```text
+   UbuntuServer24.04_BASE.ova
+   ```
+
+5. Revisa la llista de discos i confirma que no s'hi inclogui la ISO d'instal·lació.
+6. Activa la creació del manifest si VirtualBox ofereix aquesta opció.
+7. Completa les metadades útils, com el nom del producte, la versió i una descripció breu.
+8. Inicia l'exportació i espera que finalitzi sense tancar VirtualBox.
+
+<!-- IMATGE IMPRESCINDIBLE: assistent d'exportació de VirtualBox amb la VM correcta, format OVF 2.0, nom del fitxer OVA i opcions revisades abans de confirmar. Fitxer recomanat: imatges/44-assistent-exportacio-ova.png -->
+
+<!-- IMATGE IMPRESCINDIBLE: fitxer UbuntuServer24.04_BASE.ova creat correctament, amb el nom, la mida i la data visibles. Fitxer recomanat: imatges/45-fitxer-ova-exportat.png -->
+
+### 15.4 Registrar la integritat de l'OVA
+
+Si l'amfitrió és Linux, genera una suma de verificació al mateix directori que l'OVA:
+
+```bash
+sha256sum UbuntuServer24.04_BASE.ova > UbuntuServer24.04_BASE.ova.sha256
+sha256sum -c UbuntuServer24.04_BASE.ova.sha256
+```
+
+La suma permet comprovar que el fitxer no s'ha corromput després de copiar-lo o descarregar-lo. En altres sistemes operatius es pot utilitzar una eina equivalent de SHA-256.
+
+<!-- IMATGE IMPRESCINDIBLE: comprovació correcta de la suma SHA-256 de l'OVA amb el resultat OK. Fitxer recomanat: imatges/45a-verificacio-sha256-ova.png -->
+
+> [!CAUTION]
+> Els fitxers OVA, ISO, VDI i VMDK són binaris molt grans. No els afegeixis al repositori Git tret que el professorat ho demani expressament i s'hagi definit un sistema adequat d'emmagatzematge, com Git LFS. Al repositori n'hi ha prou amb documentar el nom, la versió, la suma SHA-256 i la ubicació autoritzada.
+
+### 15.5 Importar una còpia de prova
+
+No donis l'exportació per bona només perquè existeixi el fitxer. Fes una importació controlada:
+
+1. Mantén apagada la VM original.
+2. Obre **Fitxer > Importa una aplicació virtual**.
+3. Selecciona `UbuntuServer24.04_BASE.ova`.
+4. Assigna a la còpia un nom diferent, per exemple `UbuntuServer24.04_PROVA_OVA`.
+5. Revisa la carpeta de destinació i els recursos assignats.
+6. A la política d'adreces MAC, selecciona l'opció que **genera MAC noves per a tots els adaptadors de xarxa**.
+7. Completa la importació.
+8. Abans d'arrencar, revisa els dos adaptadors: Adaptador 1 en NAT i Adaptador 2 a `SMX-LAB`.
+9. Anota les MAC noves i confirma que no coincideixen amb les de la VM original.
+
+<!-- IMATGE IMPRESCINDIBLE: assistent d'importació de l'OVA amb el nom PROVA_OVA i la política de generació de MAC noves per a tots els adaptadors. Fitxer recomanat: imatges/46-importacio-ova-mac-noves.png -->
+
+### 15.6 Validar la màquina importada
+
+Amb la VM original encara apagada, inicia la còpia importada i comprova:
+
+```bash
+hostname
+cat /etc/machine-id
+ip -br link
+ip -br a
+ip route
+resolvectl status
+timedatectl
+systemctl status ssh.service ssh.socket --no-pager
+sudo ss -ltnp
+```
+
+Verifica també que:
+
+- L'arrencada acaba sense errors.
+- L'usuari autoritzat pot iniciar sessió.
+- Les MAC coincideixen amb les MAC noves mostrades per VirtualBox.
+- L'Adaptador 1 obté xarxa per DHCP i manté la ruta per defecte.
+- L'Adaptador 2 conserva la configuració interna prevista.
+- La resolució DNS, l'hora i OpenSSH funcionen.
+
+<!-- IMATGE IMPRESCINDIBLE: validació de la VM importada amb hostname, MAC, IP, ruta, DNS, hora i SSH comprovats; oculta machine-id i no mostris contrasenyes ni dades sensibles. Fitxer recomanat: imatges/47-validacio-ova-importada.png -->
+
+### 15.7 Personalitzar cada còpia abans d'utilitzar-la
+
+La importació de prova demostra que l'OVA funciona, però una còpia destinada a una pràctica ha de rebre una identitat pròpia. Abans d'encendre alhora diverses còpies a `SMX-LAB`, revisa:
+
+| Element | Acció requerida |
+|---|---|
+| Nom a VirtualBox | Assignar un nom únic a cada VM. |
+| MAC | Generar MAC noves durant la importació. |
+| Hostname | Canviar-lo si les còpies representen servidors diferents. |
+| IP interna | Assignar una IP única dins de `192.168.50.0/24`. |
+| Credencials i claus | Revisar-les segons la política de la pràctica. |
+| `machine-id` | Comprovar-lo si es desplegaran múltiples còpies; aplicar el procediment de generalització indicat pel professorat abans de posar-les en producció. |
+
+No arrenquis simultàniament la base original i una còpia encara configurada amb el mateix hostname i `192.168.50.10/24`. Primer personalitza la còpia amb l'original apagada.
+
+La preparació es considera acabada quan l'OVA s'ha exportat, se n'ha registrat la integritat, s'ha importat amb MAC noves i la còpia ha superat totes les comprovacions.
+
+<!-- IMATGE IMPRESCINDIBLE: evidència final de l'OVA validada, amb la VM original apagada i la còpia importada identificada amb un nom diferent i MAC noves. Fitxer recomanat: imatges/48-ova-final-validada.png -->
+
+---
+
 ## Estructura proposada del repositori
 
 El repositori es pot ampliar a mesura que avancin les pràctiques:
@@ -1252,7 +1752,21 @@ ubuntu-server-smx/
 ├── configuracions/
 │   └── netplan/
 ├── scripts/
-└── evidencies/
+├── evidencies/
+├── artefactes/
+│   ├── README-OVA.md
+│   └── UbuntuServer24.04_BASE.ova.sha256
+└── .gitignore
+```
+
+Per evitar pujar accidentalment màquines virtuals, discos i ISO, afegeix al `.gitignore`:
+
+```gitignore
+*.ova
+*.ovf
+*.vdi
+*.vmdk
+*.iso
 ```
 
 No publiquis al repositori:
@@ -1270,11 +1784,14 @@ No publiquis al repositori:
 - [Ubuntu Server basic installation](https://ubuntu.com/server/docs/tutorial/basic-installation/)
 - [Subiquity screen by screen](https://canonical-subiquity.readthedocs-hosted.com/en/latest/tutorial/screen-by-screen.html)
 - [Oracle VirtualBox networking](https://docs.oracle.com/en/virtualization/virtualbox/7.1/user/networkingdetails.html)
+- [Oracle VirtualBox: importació i exportació de màquines virtuals](https://docs.oracle.com/en/virtualization/virtualbox/7.1/user/Introduction.html#importing-and-exporting-virtual-machines)
 - [Ubuntu network configuration](https://ubuntu.com/server/docs/explanation/networking/configuring-networks/)
 - [Netplan YAML](https://netplan.readthedocs.io/en/stable/netplan-yaml/)
 - [Netplan try](https://netplan.readthedocs.io/en/stable/netplan-try/)
 - [Ubuntu OpenSSH](https://ubuntu.com/server/docs/how-to/security/openssh-server/)
 - [Ubuntu user management](https://ubuntu.com/server/docs/how-to/security/user-management/)
+- [Zorin OS: instal·lació en una màquina virtual](https://help.zorin.com/docs/getting-started/install-zorin-os-in-a-virtual-machine/)
+- [systemd machine ID](https://www.freedesktop.org/software/systemd/man/latest/machine-id.html)
 
 ## Autoria i ús docent
 
