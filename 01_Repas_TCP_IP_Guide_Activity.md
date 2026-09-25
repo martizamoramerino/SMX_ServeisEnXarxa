@@ -31,6 +31,7 @@ Un protocol és un conjunt de regles que permeten comunicar-se als equips. **TCP
 | Accés a la xarxa | Ethernet, Wi-Fi | Com es transmet dins de l'enllaç local? |
 
 <!-- IMATGE 01: Diagrama de quatre capes de la pila TCP/IP. Mostra un missatge que baixa per les capes de l'emissor i puja per les del receptor; etiqueta HTTP/DNS, TCP/UDP i ports, IP, Ethernet/Wi-Fi i MAC. No afegeixis protocols sense explicar-los. Fitxer suggerit: imatges/pila-tcp-ip.png -->
+![Pila TCP/IP](./source/01_Repas_TCP_IP/01-pila-tcp-ip.png)
 
 ### Identificadors que no s'han de confondre
 
@@ -83,6 +84,7 @@ La màscara marca amb bits **1** la part de xarxa i amb bits **0** la part dispo
 Per exemple, `255.255.255.192` té **26 bits a 1**: els primers 24 corresponen als tres primers octets i l'últim octet, `192`, és `11000000` en binari. Per això s'escriu `/26`.
 
 <!-- IMATGE 02: Esquema horitzontal dels 32 bits d'una IPv4 i d'una màscara /26; ressalta en colors diferents els 26 bits de xarxa i els 6 bits restants. Usa 192.168.22.15/26 i escriu 192 = 11000000. Fitxer suggerit: imatges/mascara-26-bits.png -->
+![Mascara 26 Bits](./source/01_Repas_TCP_IP/02-mascara-26-bits.png)
 
 ### Com es calcula l'adreça de xarxa?
 
@@ -113,6 +115,7 @@ Quan el valor de la màscara canvia en un octet, calcula **`256 − valor de la 
 **Exemple 3: `8.45.127.12/20`.** En el tercer octet, `256 − 240 = 16` i `127` cau al bloc `112–127`. La xarxa és `8.45.112.0` i el broadcast `8.45.127.255`. Observa que un bloc pot abraçar diversos valors del tercer octet.
 
 <!-- IMATGE 03: Recta de blocs /22 en el tercer octet. Dibuixa 92–95, 96–99, 100–103; destaca la IP 10.254.96.104 i els extrems 10.254.96.0 i 10.254.99.255. Fitxer suggerit: imatges/blocs-subxarxes-22.png -->
+![Bloc SubXarxa /22](./source/01_Repas_TCP_IP/03-blocs-subxarxes-22.png)
 
 ### Procediment que pots repetir sempre
 
@@ -135,6 +138,7 @@ Per comunicar-se, un equip acostuma a necessitar:
 - **Servidor DNS:** tradueix noms com `www.upc.edu` a adreces IP. **No és necessàriament la porta d'enllaç**.
 
 <!-- IMATGE 04: Pantalla esquemàtica de configuració d'un PC amb 192.168.10.20/24, gateway 192.168.10.1 i DNS 1.1.1.1. Indica que el DNS és només un exemple i que gateway i PC comparteixen la xarxa 192.168.10.0/24. Fitxer suggerit: imatges/configuracio-ip.png -->
+![Configuracio IP](./source/01_Repas_TCP_IP/04-configuracio-ip.png)
 
 **Diagnosi d'una configuració:**
 
@@ -162,7 +166,7 @@ Quan diverses rutes coincideixen amb la IP de destinació, s'escull la **coincid
 **Exemple:** `10.10.20.9` és dins de `10.10.20.0/27`, que cobreix del `.0` al `.31`: el router l'envia a `10.1.2.2`. `10.10.20.36` cau fora d'aquest bloc i, si no hi ha cap altra coincidència, segueix la ruta per defecte.
 
 <!-- IMATGE 05: Dues xarxes locals, un router i una petita taula de rutes. Mostra en colors diferents un paquet que segueix la ruta /27 i un altre que segueix la ruta /0. Fitxer suggerit: imatges/rutes-i-seguent-salt.png -->
-
+![Rutes i Seguent Salt](./source/01_Repas_TCP_IP/05-rutes-i-seguent-salt.png)
 ## 6. TCP, UDP i ports
 
 La capa de transport permet la comunicació entre aplicacions. **TCP** estableix una connexió, numera dades, detecta pèrdues i les retransmet quan cal, i lliura el flux de bytes en ordre. **UDP** envia datagrames sense establir una connexió d'aquest tipus i no proporciona per si mateix aquestes garanties; una aplicació pot afegir els mecanismes que necessiti.
@@ -206,6 +210,7 @@ Quan molts equips comparteixen **una IP pública**, el router també diferencia 
 El router registra aquestes associacions mentre són actives. En el trànsit de tornada, les consulta per lliurar cada resposta al dispositiu corresponent. La **traducció de destinació** (*DNAT*) es pot fer servir, per exemple, per redirigir cap a un servidor intern les peticions que arriben a un port publicat.
 
 <!-- IMATGE 06: Dos clients privats, un router amb una IP pública i un servidor remot. Dibuixa una petita taula amb les parelles IP:port abans i després de PAT i el recorregut de la resposta. Fitxer suggerit: imatges/nat-pat.png -->
+![Nat Pat](./source/01_Repas_TCP_IP/06-nat-pat.png)
 
 Amb **CG-NAT**, també el proveïdor d'Internet fa una traducció i diversos clients poden compartir adreces públiques. Això pot dificultar que una petició iniciada des d'Internet arribi directament a un servidor de casa, encara que es configurin ports al router domèstic. Per investigar-ho, compara l'adreça **WAN del teu router** amb l'adreça pública observada a Internet i consulta el proveïdor; un `tracert` pot aportar pistes, però **per si sol no demostra** que hi hagi CG-NAT.
 
