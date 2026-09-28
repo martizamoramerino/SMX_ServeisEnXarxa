@@ -1,59 +1,34 @@
 # Ubuntu Server 24.04 LTS base per a Serveis en Xarxa
 
-Guia pràctica per crear, instal·lar, configurar i verificar una màquina virtual amb Ubuntu Server 24.04 LTS que servirà com a base per a les pràctiques del mòdul MP07 Serveis de Xarxa de 2n de SMX.
+Guia pas a pas per crear una màquina virtual amb Ubuntu Server 24.04 LTS i deixar-la preparada per a les pràctiques de **MP07 Serveis de Xarxa de 2n de SMX**.
 
-El procediment segueix la presentació `GUIA UBUNTU SERVER` i incorpora els aclariments i correccions de la guia docent associada. L'objectiu no és únicament aconseguir que Ubuntu arrenqui, sinó deixar una màquina identificable, actualitzada, administrable, connectada correctament i preparada per desplegar-hi serveis de xarxa.
+En acabar no tindràs només un sistema que arrenca: tindràs una base actualitzada, identificada, accessible per SSH, amb dues interfícies de xarxa, una instantània i una OVA comprovada.
 
 > [!IMPORTANT]
 > No copiïs cegament noms d'interfície, fitxers de Netplan o adreces IP de les captures. Valida sempre quins valors existeixen realment a la teva màquina.
 
+## Ruta de treball
+
+| Fase | Apartats | Què aconseguiràs? |
+|---|---|---|
+| **1. Instal·lació** | 1–2 | Crear la VM i instal·lar Ubuntu Server. |
+| **2. Configuració bàsica** | 3–9 | Actualitzar el sistema i configurar identitat, administració, SSH, teclat i hora. |
+| **3. Xarxa del laboratori** | 10–11 | Afegir la segona interfície i configurar Netplan de manera segura. |
+| **4. Base recuperable** | 12–13 | Validar-ho tot i crear una instantània. |
+| **5. Escenari i distribució** | 14–15 | Connectar un client i exportar/importar una OVA. |
+
+> [!TIP]
+> Segueix els apartats en ordre la primera vegada. Si reprens la pràctica, consulta el **resultat esperat** de cada apartat per saber des d'on has de continuar.
+
 ## Índex
 
-> Els números que apareixen a continuació coincideixen amb els números reals dels apartats al document. Els punts sense número corresponen a seccions introductòries, transversals o d'annex.
-
-- [Resultat final](#resultat-final)
-- [Convencions de la guia](#convencions-de-la-guia)
-- [Requisits previs](#requisits-previs)
-- **1.** [Crear la màquina virtual](#1-crear-la-màquina-virtual)
-- **2.** [Instal·lar Ubuntu Server](#2-instal·lar-ubuntu-server)
-- **3.** [Fer les primeres comprovacions](#3-fer-les-primeres-comprovacions)
-- **4.** [Actualitzar el sistema](#4-actualitzar-el-sistema)
-- **5.** [Configurar el nom del servidor](#5-configurar-el-nom-del-servidor)
-- **6.** [Comprovar OpenSSH](#6-comprovar-openssh)
-- **7.** [Gestionar els permisos administratius](#7-gestionar-els-permisos-administratius)
-- **8.** [Configurar el teclat](#8-configurar-el-teclat)
-- **9.** [Configurar la data i l'hora](#9-configurar-la-data-i-lhora)
-- **10.** [Entendre i afegir una segona interfície](#10-entendre-i-afegir-una-segona-interfície)
-  - 10.1 [Distingir les peces de la xarxa](#101-distingir-les-peces-de-la-xarxa)
-  - 10.2 [Conèixer els modes de xarxa de VirtualBox](#102-conèixer-els-modes-de-xarxa-de-virtualbox)
-  - 10.3 [Planificar els dos adaptadors](#103-planificar-els-dos-adaptadors)
-  - 10.4 [Apagar correctament el servidor](#104-apagar-correctament-el-servidor)
-  - 10.5 [Configurar VirtualBox](#105-configurar-virtualbox)
-  - 10.6 [Identificar les interfícies i les MAC a Ubuntu](#106-identificar-les-interfícies-i-les-mac-a-ubuntu)
-  - 10.7 [Entendre què aporta la MAC](#107-entendre-què-aporta-la-mac)
-- **11.** [Configurar Netplan](#11-configurar-netplan)
-  - 11.1 [Registrar l'estat abans del canvi](#111-registrar-lestat-abans-del-canvi)
-  - 11.2 [Identificar el fitxer existent](#112-identificar-el-fitxer-existent)
-    - 11.2.1 [Quan Nano mostra `[ New File ]`](#1121-quan-nano-mostra--new-file)
-  - 11.3 [Fer una còpia de seguretat](#113-fer-una-còpia-de-seguretat)
-  - 11.4 [Editar el fitxer real](#114-editar-el-fitxer-real)
-  - 11.5 [Validar la sintaxi](#115-validar-la-sintaxi)
-  - 11.6 [Provar la configuració](#116-provar-la-configuració)
-  - 11.7 [Comprovar les adreces i l'estat de Netplan](#117-comprovar-les-adreces-i-lestat-de-netplan)
-  - 11.8 [Comprovar les rutes](#118-comprovar-les-rutes)
-  - 11.9 [Comprovar el DNS](#119-comprovar-el-dns)
-  - 11.10 [Fer proves de connectivitat per capes](#1110-fer-proves-de-connectivitat-per-capes)
-  - 11.11 [Recuperar-se des de la consola](#1111-recuperar-se-des-de-la-consola)
-  - [Errors habituals de Netplan](#errors-habituals-de-netplan)
-- **12.** [Validar la màquina base](#12-validar-la-màquina-base)
-- **13.** [Crear una instantània](#13-crear-una-instantània)
-- [Protocol general de diagnosi](#protocol-general-de-diagnosi)
-- [Errors freqüents](#errors-freqüents)
-- **14.** [Preparar l'escenari servidor-client](#14-preparar-lescenari-servidor-client)
-- **15.** [Crear i validar l'OVA de la màquina base](#15-crear-i-validar-lova-de-la-màquina-base)
-- [Estructura proposada del repositori](#estructura-proposada-del-repositori)
-- [Fonts tècniques de suport](#fonts-tècniques-de-suport)
-- [Autoria i ús docent](#autoria-i-ús-docent)
+- **Preparació:** [Resultat final](#resultat-final) · [Convencions](#convencions-de-la-guia) · [Requisits previs](#requisits-previs)
+- **Fase 1 — Instal·lació:** [1. Crear la VM](#1-crear-la-màquina-virtual) · [2. Instal·lar Ubuntu Server](#2-instal·lar-ubuntu-server)
+- **Fase 2 — Configuració bàsica:** [3. Primeres comprovacions](#3-fer-les-primeres-comprovacions) · [4. Actualitzar](#4-actualitzar-el-sistema) · [5. Nom del servidor](#5-configurar-el-nom-del-servidor) · [6. OpenSSH](#6-comprovar-openssh) · [7. Permisos](#7-gestionar-els-permisos-administratius) · [8. Teclat](#8-configurar-el-teclat) · [9. Data i hora](#9-configurar-la-data-i-lhora)
+- **Fase 3 — Xarxa:** [10. Segona interfície](#10-entendre-i-afegir-una-segona-interfície) · [11. Netplan](#11-configurar-netplan)
+- **Fase 4 — Base recuperable:** [12. Validació](#12-validar-la-màquina-base) · [13. Instantània](#13-crear-una-instantània)
+- **Fase 5 — Escenari i distribució:** [14. Servidor-client](#14-preparar-lescenari-servidor-client) · [15. OVA](#15-crear-i-validar-lova-de-la-màquina-base)
+- **Consulta i ajuda:** [Protocol de diagnosi](#protocol-general-de-diagnosi) · [Errors freqüents](#errors-freqüents) · [Estructura del repositori](#estructura-proposada-del-repositori) · [Fonts](#fonts-tècniques-de-suport)
 
 ## Resultat final
 
@@ -94,6 +69,14 @@ Durant el document trobaràs comentaris HTML amb el format següent:
 
 Aquests comentaris són visibles quan edites el fitxer a Visual Studio Code, però no apareixen en la previsualització del Markdown ni al README publicat. Substitueix cada comentari per la imatge corresponent quan disposis de la captura.
 
+Per seguir els passos amb seguretat:
+
+- Executa només les ordres del bloc de codi; no copiïs el *prompt* ni la sortida de les captures.
+- Substitueix els noms d'usuari, interfície i fitxer pels que hagis comprovat a la teva VM.
+- Després de cada canvi, compara el resultat amb el text **Resultat esperat** de l'apartat.
+- Si el resultat no coincideix, atura't i resol aquell pas abans de continuar.
+- Les captures poden mostrar noms o adreces d'una execució diferent. La taula següent defineix els valors comuns d'aquesta guia.
+
 Els valors següents s'utilitzen com a proposta comuna:
 
 | Element | Valor proposat |
@@ -128,7 +111,13 @@ La ISO es troba a l'ordinador físic. VirtualBox la presenta a la màquina virtu
 
 ---
 
+> **FASE 1 · INSTAL·LACIÓ** — Crea la màquina virtual i instal·la el sistema operatiu.
+
 ## 1. Crear la màquina virtual
+
+> **Objectiu:** crear una VM amb els recursos correctes i una sola interfície NAT.
+>
+> **Resultat esperat:** la VM queda apagada, amb 4 GB de RAM, disc de 25 GB, ISO muntada i Adaptador 1 en NAT.
 
 ### 1.1 Crear una màquina nova
 
@@ -158,13 +147,18 @@ Configura els valors següents:
 
 ### 1.2 Assistent d'instal·lació desatesa
 
-L'assistent de VirtualBox 7.x ofereix l'opció **Proceed with Unattended Installation**. Si la deixes activada, la pantalla següent et demanarà l'usuari, la contrasenya i el nom del servidor perquè VirtualBox els injecti automàticament durant la instal·lació.
+VirtualBox 7.x pot automatitzar la instal·lació amb **Proceed with Unattended Installation**. Per a aquesta pràctica es recomana el recorregut manual:
+
+| Opció | Què passa? | Quan utilitzar-la? |
+|---|---|---|
+| **Desactivada** | Veuràs i completaràs totes les pantalles de la secció 2. | Primera instal·lació i activitat d'aprenentatge. |
+| **Activada** | VirtualBox injecta usuari, contrasenya i hostname i automatitza part de l'assistent. | Repeticions posteriors, si el professorat ho indica. |
 
 <!-- CAPTURA VIRTUALBOX: pantalla "Set up unattended guest OS installation" amb el nom d'usuari, la contrasenya i el Host Name -->
 ![Instal·lació desatesa: usuari i nom del servidor](./source/00_UbuntuServer_Images/00-virtualbox-config-inicial.png)
 
 > [!IMPORTANT]
-> Aquesta guia segueix manualment totes les pantalles de l'instal·lador perquè es puguin comprendre les decisions adoptades (secció 2). Si vols seguir-la pas a pas tal com està escrita, desactiva **Proceed with Unattended Installation** a l'assistent. Si la deixes activada, VirtualBox completarà per tu els passos d'idioma, usuari i xarxa descrits a la secció 2 i podràs saltar directament a la secció 3.
+> Desactiva **Proceed with Unattended Installation** si vols seguir aquesta guia pantalla per pantalla. Si ja has fet una instal·lació desatesa, continua a la secció 3 i comprova els valors obtinguts; no assumeixis que coincideixen amb els proposats.
 
 A continuació, l'assistent demana la memòria RAM, el nombre de processadors i la mida del disc.
 
@@ -205,6 +199,29 @@ Encara no afegeixis la segona interfície. Primer instal·larem i comprovarem el
 ---
 
 ## 2. Instal·lar Ubuntu Server
+
+> **Objectiu:** instal·lar Ubuntu Server manualment i entendre cada decisió de l'assistent.
+>
+> **Resultat esperat:** Ubuntu arrenca des del disc virtual, sense la ISO, i mostra l'inici de sessió.
+
+### Decisions de la instal·lació
+
+Utilitza aquesta taula com a mapa de l'assistent. Els apartats següents expliquen cada pantalla i mostren les captures.
+
+| Pantalla | Decisió per a aquesta guia |
+|---|---|
+| Idioma | L'idioma acordat a classe. |
+| Teclat | `Spanish` / `Spanish`, si correspon al teclat físic. |
+| Modalitat | Ubuntu Server estàndard, no minimitzat. |
+| Xarxa | DHCP a l'únic adaptador NAT. |
+| Proxy | En blanc, tret que el centre n'utilitzi un. |
+| Mirall | El servidor proposat per l'instal·lador, si funciona. |
+| Emmagatzematge | Disc complet guiat sobre el disc virtual. |
+| Perfil | Usuari acordat i hostname temporal o definitiu. |
+| Ubuntu Pro | Ometre en aquesta base. |
+| OpenSSH | Instal·lar el servidor OpenSSH. |
+| Paquets opcionals | No afegir-ne encara. |
+| Final | Reiniciar i retirar la ISO. |
 
 ### 2.1 Arrencar l'instal·lador
 
@@ -457,6 +474,12 @@ Si torna a aparèixer l'instal·lador, apaga la VM, desmunta la ISO i revisa l'o
 
 ## 3. Fer les primeres comprovacions
 
+> **FASE 2 · CONFIGURACIÓ BÀSICA** — Comprova el sistema i prepara'l per administrar-lo.
+>
+> **Objectiu:** confirmar que la instal·lació ha acabat correctament abans de modificar res.
+>
+> **Resultat esperat:** pots iniciar sessió i identificar usuari, hostname, IP, ruta i espai de disc.
+
 ### 3.1 Iniciar sessió
 
 Introdueix el nom d'usuari i la contrasenya creats durant la instal·lació.
@@ -508,6 +531,10 @@ No és necessari que totes les dades coincideixin amb les captures. Cal interpre
 
 ## 4. Actualitzar el sistema
 
+> **Objectiu:** instal·lar les correccions disponibles i carregar-les completament.
+>
+> **Resultat esperat:** `apt` no mostra actualitzacions pendents i, si s'ha actualitzat el nucli, la VM ja s'ha reiniciat.
+
 ### 4.1 Actualitzar el catàleg de paquets
 
 ```bash
@@ -535,16 +562,7 @@ Al terminal veuràs una seqüència semblant a aquesta:
 
 Llegeix el resum i confirma l'operació quan ho demani.
 
-La presentació mostra una versió combinada:
-
-```bash
-sudo apt update && sudo apt upgrade -y
-```
-
-En aquesta primera execució és preferible separar les ordres:
-
-- `&&` executa la segona ordre només si la primera finalitza correctament.
-- `-y` accepta automàticament les confirmacions.
+La primera captura mostra `sudo apt update && sudo apt upgrade -y`. En aquesta primera execució, fes servir les ordres separades dels apartats 4.1 i 4.2: podràs llegir cada resultat i confirmar l'actualització. A la forma combinada, `&&` només executa la segona ordre si la primera acaba correctament i `-y` accepta les confirmacions automàticament.
 
 ### 4.3 Reiniciar després de les actualitzacions
 
@@ -578,6 +596,10 @@ ip -br a
 ---
 
 ## 5. Configurar el nom del servidor
+
+> **Objectiu:** assignar una identitat coherent al servidor.
+>
+> **Resultat esperat:** `hostname` retorna `srv-smx01` i `hostname -f` retorna `srv-smx01.aula.test`.
 
 ### 5.1 Establir el hostname
 
@@ -663,6 +685,10 @@ Editar `/etc/hosts` només crea una associació local al servidor. No configura 
 
 ## 6. Comprovar OpenSSH
 
+> **Objectiu:** verificar que el servidor acceptarà connexions SSH.
+>
+> **Resultat esperat:** `ssh.socket` o `ssh.service` està actiu i el port TCP 22 apareix en escolta.
+
 Consulta el servei i el socket:
 
 ```bash
@@ -693,6 +719,10 @@ Amb NAT individual, una connexió entrant des de fora de la VM pot requerir reen
 ---
 
 ## 7. Gestionar els permisos administratius
+
+> **Objectiu:** administrar el servidor amb `sudo` sense treballar habitualment com a `root`.
+>
+> **Resultat esperat:** l'usuari principal pot executar `sudo whoami` i obté `root`.
 
 ### 7.1 Comprovar sudo
 
@@ -763,6 +793,10 @@ sudo whoami
 
 ## 8. Configurar el teclat
 
+> **Objectiu:** fer coincidir la distribució configurada amb el teclat físic.
+>
+> **Resultat esperat:** pots escriure correctament `/`, `:`, `@`, `-` i `_` a la consola.
+
 Si la distribució de la consola és incorrecta:
 
 ```bash
@@ -812,6 +846,10 @@ Si l'error només apareix durant una connexió SSH, revisa també el teclat i el
 ---
 
 ## 9. Configurar la data i l'hora
+
+> **Objectiu:** configurar el fus horari i la sincronització, imprescindibles per als registres i els serveis.
+>
+> **Resultat esperat:** `timedatectl` mostra `Europe/Madrid` i el rellotge sincronitzat.
 
 ### 9.1 Consultar l'estat
 
@@ -873,6 +911,12 @@ Activar NTP no demostra que la sincronització sigui immediata. Cal verificar l'
 ---
 
 ## 10. Entendre i afegir una segona interfície
+
+> **FASE 3 · XARXA DEL LABORATORI** — Separa la sortida a Internet de la comunicació interna.
+>
+> **Objectiu:** afegir una interfície interna i relacionar cada adaptador de VirtualBox amb la interfície d'Ubuntu corresponent.
+>
+> **Resultat esperat:** Adaptador 1 és NAT, Adaptador 2 és `SMX-LAB` i totes dues MAC estan documentades.
 
 A partir d'aquest punt, la xarxa és una part central de la pràctica. No n'hi ha prou amb copiar una IP: cal saber quin adaptador virtual, quina interfície d'Ubuntu i quina adreça MAC intervenen en cada connexió.
 
@@ -1017,7 +1061,24 @@ Tenir dues interfícies no converteix automàticament Ubuntu en un encaminador i
 
 ## 11. Configurar Netplan
 
-Netplan descriu la configuració persistent de xarxa en fitxers YAML i genera la configuració que aplicarà el gestor de xarxa del sistema. El procés segur és sempre el mateix: observar, fer còpia, editar, validar, provar, aplicar i tornar a comprovar.
+> **Objectiu:** mantenir el NAT per DHCP i assignar `192.168.50.10/24` a la xarxa interna.
+>
+> **Resultat esperat:** les dues IP són persistents, només hi ha una ruta per defecte i la resolució DNS funciona.
+
+Netplan desa la configuració persistent en fitxers YAML. No saltis l'ordre següent:
+
+| Pas | Acció | Per què? |
+|---:|---|---|
+| 1 | Observar l'estat actual | Identificar interfícies, IP i ruta abans del canvi. |
+| 2 | Localitzar el YAML real | Evitar editar o crear el fitxer equivocat. |
+| 3 | Fer una còpia | Poder recuperar la configuració anterior. |
+| 4 | Editar | Afegir la IP interna sense canviar la sortida NAT. |
+| 5 | Validar amb `netplan generate` | Detectar errors de sintaxi. |
+| 6 | Provar amb `netplan try` | Revertir automàticament si es perd la connexió. |
+| 7 | Comprovar | Revisar adreces, rutes, DNS i connectivitat. |
+
+> [!CAUTION]
+> Mantén oberta la consola de VirtualBox durant tot el procés. No facis el primer canvi de xarxa només des d'una sessió SSH.
 
 ### 11.1 Registrar l'estat abans del canvi
 
@@ -1110,16 +1171,16 @@ Habitualment, els fitxers de configuració han de pertànyer a root i tenir perm
 Si el fitxer editat té permisos massa oberts, ajusta'ls substituint el nom pel fitxer real:
 
 ```bash
-sudo chown root:root /etc/netplan/00-installer-config.yaml
-sudo chmod 600 /etc/netplan/00-installer-config.yaml
+sudo chown root:root /etc/netplan/50-cloud-init.yaml
+sudo chmod 600 /etc/netplan/50-cloud-init.yaml
 ```
 
 ### 11.4 Editar el fitxer real
 
-Substitueix el nom de l'exemple pel fitxer que existeixi a la teva màquina:
+La captura mostra `50-cloud-init.yaml`; utilitza aquest nom només si és el que has trobat a l'apartat 11.2:
 
 ```bash
-sudo nano /etc/netplan/00-installer-config.yaml
+sudo nano /etc/netplan/50-cloud-init.yaml
 ```
 
 Exemple de configuració:
@@ -1314,6 +1375,12 @@ Si existeixen altres fitxers creats després de la còpia, inspecciona'ls abans 
 
 ## 12. Validar la màquina base
 
+> **FASE 4 · BASE RECUPERABLE** — Demostra que la configuració funciona i desa un punt de retorn.
+>
+> **Objectiu:** comprovar conjuntament identitat, xarxa, administració, hora i persistència.
+>
+> **Resultat esperat:** totes les comprovacions i la llista final d'aquest apartat són correctes després de reiniciar.
+
 Una instal·lació no es considera acabada simplement perquè arribi a la pantalla d'inici de sessió. Cal demostrar que la configuració funciona i persisteix.
 
 ### 12.1 Identitat i permisos
@@ -1419,6 +1486,10 @@ La base només es dona per acabada si les configuracions pertinents es conserven
 ---
 
 ## 13. Crear una instantània
+
+> **Objectiu:** conservar un punt de retorn abans d'instal·lar serveis addicionals.
+>
+> **Resultat esperat:** existeix la instantània `00_BASE_UBUNTU_SERVER_24_04` amb la VM apagada.
 
 ### 13.1 Fer una última actualització
 
@@ -1711,6 +1782,12 @@ No canviïs el rellotge manualment abans de distingir entre:
 
 ## 14. Preparar l'escenari servidor-client
 
+> **FASE 5 · ESCENARI I DISTRIBUCIÓ** — Connecta un client i prepara una base transportable.
+>
+> **Objectiu:** connectar el servidor i un client Zorin a la mateixa xarxa interna.
+>
+> **Resultat esperat:** servidor i client es veuen per `SMX-LAB`, responen al ping intern i el client pot obrir una sessió SSH.
+
 Les pràctiques posteriors combinaran habitualment un servidor sense entorn gràfic i un client d'escriptori. Es recomana **Zorin OS** com a client perquè ofereix un entorn gràfic accessible i permet treballar amb eines compatibles amb la família Ubuntu.
 
 ### 14.1 Dissenyar la topologia
@@ -1828,6 +1905,10 @@ La topologia queda validada si:
 
 ## 15. Crear i validar l'OVA de la màquina base
 
+> **Objectiu:** obtenir una còpia transportable i demostrar que es pot importar.
+>
+> **Resultat esperat:** l'OVA té una suma SHA-256 registrada i una còpia importada amb MAC noves supera la validació.
+
 L'última operació de la preparació és exportar la màquina base com a **OVA**. El fitxer OVA empaqueta la definició de la VM i els seus discos virtuals en un únic arxiu transportable, però només serà fiable si després se'n comprova la importació.
 
 ### 15.1 Diferenciar instantània, clon i OVA
@@ -1919,7 +2000,7 @@ Amb la VM apagada:
    <!-- Captura pròpia de la pràctica (VirtualBox): indicador de progrés de l'escriptura del servei virtualitzat -->
 
 > [!NOTE]
-> Les captures mostren els noms utilitzats durant aquesta execució (`UbuntuServer_BaseStudy` i `UbuntuServer_OVA_Test`). Pots adaptar-los a la convencí del curs; el que cal mantenir és que la base i la còpia importada tinguin noms inequívocament diferents.
+> Les captures mostren els noms utilitzats durant aquesta execució (`UbuntuServer_BaseStudy` i `UbuntuServer_OVA_Test`). Pots adaptar-los a la convenció del curs; el que cal mantenir és que la base i la còpia importada tinguin noms inequívocament diferents.
 
 <!-- IMATGE IMPRESCINDIBLE PENDENT: fitxer UbuntuServer24.04_BASE.ova creat correctament, amb el nom, la mida i la data visibles i sense menús que el tapin. Fitxer suggerit: source/00_UbuntuServer_Images/72a-fitxer-ova-exportat.png -->
 
@@ -2065,6 +2146,13 @@ No publiquis al repositori:
 
 ## Fonts tècniques de suport
 
+Materials docents de partida:
+
+- `00_GuiaUbuntuServer.pdf`, guia visual d'instal·lació.
+- `01_Guia_docent_Ubuntu_Server_24_04.docx`, orientacions docents, resultats esperats i errors habituals.
+
+Documentació tècnica consultada:
+
 - [Ubuntu Server documentation](https://ubuntu.com/server/docs)
 - [Ubuntu Server installation requirements](https://ubuntu.com/server/docs/reference/installation/system-requirements/)
 - [Ubuntu Server basic installation](https://ubuntu.com/server/docs/tutorial/basic-installation/)
@@ -2081,6 +2169,6 @@ No publiquis al repositori:
 
 ## Autoria i ús docent
 
-Aquesta guia és una adaptació del procediment del procès d'instal·lació i configuració bàsica d'Ubuntu Server 24.04 LTS elaborada originalment per [Carlos Alonso Martínez a GitHub](https://github.com/carlesalonso), supervisat per Blai Redondo i incorpora els aclariments tècnics i didàctics de la guia docent complementària elaborats per [Martí Zamora i Merino a GitHub](https://github.com/martizamorapia).
+Aquesta guia adapta el procediment d'instal·lació i configuració bàsica d'Ubuntu Server 24.04 LTS elaborat originalment per [Carlos Alonso Martínez a GitHub](https://github.com/carlesalonso), amb supervisió de Blai Redondo. També incorpora els aclariments tècnics i didàctics de la guia docent complementària elaborada per [Martí Zamora i Merino a GitHub](https://github.com/martizamorapia).
 
 En qualsevol adaptació o lliurament cal conservar la referència a l'autoria i la llicència del material original, i diferenciar les ampliacions pròpies de les instruccions de partida.
