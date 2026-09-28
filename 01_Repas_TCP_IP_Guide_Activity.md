@@ -9,11 +9,26 @@ En acabar aquest repàs hauràs de poder:
 
 1. Reconèixer què fan IP, TCP, UDP, les adreces MAC i els ports.
 2. Interpretar una adreça IPv4 i una màscara, en format decimal o CIDR.
-3. Calcular l'adreça de xarxa, el broadcast i el rang d'adreces assignables.
+3. Calcular l'adreça de xarxa, el broadcast i el rang d'adreces assignables, i escollir una mida de subxarxa adequada.
 4. Comprovar si la porta d'enllaç és coherent amb la xarxa de l'equip.
 5. Interpretar una taula d'encaminament i el significat d'una ruta per defecte.
 6. Explicar el paper de NAT, PAT i CG-NAT i observar connexions amb `netstat`.
 7. Configurar i comprovar una petita topologia amb encaminament RIP a Packet Tracer.
+
+> **Com utilitzar aquesta guia:** llegeix la teoria i tapa els exemples resolts abans de repetir-ne els càlculs. Fes les activitats 1–8 sense consultar el solucionari i escriu sempre el procediment, no només el resultat. En les comprovacions amb un equip real, anota **valor esperat, valor observat i conclusió** abans de canviar la configuració.
+
+**Itinerari de consulta ràpida:**
+
+- [Conceptes, capes i identificadors](#1-per-què-necessitem-protocols-i-adreces)
+- [IPv4, IPv6 i tipus d'adreces](#2-adreces-ipv4-i-ipv6)
+- [Màscares i càlcul de subxarxes](#3-la-màscara-de-subxarxa)
+- [IP, passarel·la, DNS i diagnosi](#4-configuració-dun-equip-ip-màscara-gateway-i-dns)
+- [Encaminament i taules de rutes](#5-encaminament-entre-xarxes)
+- [TCP, UDP, ports i `netstat`](#6-tcp-udp-i-ports)
+- [NAT, PAT i CG-NAT](#7-nat-pat-i-cg-nat)
+- [Activitats](#8-pràctica-del-càlcul-al-diagnòstic)
+- [Solucionari raonat](#9-solucionari-raonat-de-les-activitats)
+- [Autoavaluació](#10-autoavaluació-final)
 
 ---
 
@@ -86,6 +101,31 @@ Per exemple, `255.255.255.192` té **26 bits a 1**: els primers 24 corresponen a
 <!-- IMATGE 02: Esquema horitzontal dels 32 bits d'una IPv4 i d'una màscara /26; ressalta en colors diferents els 26 bits de xarxa i els 6 bits restants. Usa 192.168.22.15/26 i escriu 192 = 11000000. Fitxer suggerit: imatges/mascara-26-bits.png -->
 ![Mascara 26 Bits](./source/01_Repas_TCP_IP/02-mascara-26-bits.png)
 
+### De decimal a binari sense saltar passos
+
+Cada posició d'un octet té un pes fix:
+
+```text
+Pes:        128  64  32  16   8   4   2   1
+153:          1   0   0   1   1   0   0   1  = 128 + 16 + 8 + 1
+240:          1   1   1   1   0   0   0   0  = 128 + 64 + 32 + 16
+```
+
+Per convertir `153`, es recorren els pesos d'esquerra a dreta: s'escriu `1` si el pes hi cap i es resta; si no hi cap, s'escriu `0`. El resultat és `10011001`. Els zeros inicials també compten: per exemple, `70` s'escriu `01000110` en un octet.
+
+Per obtenir la xarxa de `192.168.223.153/28`, només cal desenvolupar l'octet on talla la màscara:
+
+```text
+IP 153:       1 0 0 1 1 0 0 1
+Màscara 240:  1 1 1 1 0 0 0 0
+AND:          1 0 0 1 0 0 0 0  = 144
+```
+
+La xarxa és `192.168.223.144`. Per trobar el broadcast, es conserven els quatre bits de xarxa i es posen a `1` els quatre bits d'equip: `10011111`, que val `159`.
+
+<!-- IMATGE 03A: Graella de 8 columnes amb els pesos 128–1 i tres files: IP 153 (10011001), màscara 240 (11110000) i resultat AND 144 (10010000). Diferencia amb dos colors els bits de xarxa i els bits d'equip, i afegeix el broadcast 159 (10011111). Fitxer suggerit: source/01_Repas_TCP_IP/03a-and-binari-28.png -->
+![AND Binari i Broadcast amb /28](./source/01_Repas_TCP_IP/03a-and-binari-28.png)
+
 ### Com es calcula l'adreça de xarxa?
 
 Es fa una operació **AND bit a bit** entre la IP i la màscara: `1 AND 1 = 1`; qualsevol altra combinació dona `0`. Els bits de l'equip passen a zero i obtenim l'**adreça de xarxa**.
@@ -128,6 +168,24 @@ Quan el valor de la màscara canvia en un octet, calcula **`256 − valor de la 
 
 > **Comprovació:** aplica la màscara a dues IP. Si el resultat és la mateixa adreça de xarxa, són dins de la mateixa subxarxa IPv4.
 
+### Escollir la mida i dividir un bloc
+
+Quan el problema parteix d'un nombre de dispositius, compta totes les interfícies que necessitaran una IP: ordinadors, impressores, servidors i la interfície del router. Després busca el menor nombre de bits d'equip `h` que compleixi `2^h − 2 ≥ dispositius` en una subxarxa convencional.
+
+**Exemple:** 50 ordinadors, 2 impressores i 1 interfície de router necessiten 53 IP assignables. Amb 5 bits hi ha `2^5 − 2 = 30` hosts, insuficients; amb 6 bits n'hi ha `2^6 − 2 = 62`. Per tant, el prefix mínim és `/26` (`32 − 6 = 26`).
+
+Si es divideix `192.168.10.0/24` en quatre subxarxes iguals, calen 2 bits per identificar-les (`2^2 = 4`). El nou prefix és `/26` i els blocs comencen cada 64 adreces:
+
+| Subxarxa | Hosts assignables | Broadcast |
+|---|---|---|
+| `192.168.10.0/26` | `.1–.62` | `.63` |
+| `192.168.10.64/26` | `.65–.126` | `.127` |
+| `192.168.10.128/26` | `.129–.190` | `.191` |
+| `192.168.10.192/26` | `.193–.254` | `.255` |
+
+<!-- IMATGE 03B: Barra de 192.168.10.0/24 dividida en quatre blocs /26 iguals. Marca xarxa, interval assignable i broadcast de cada bloc, i mostra que 4 × 64 = 256 adreces. Fitxer suggerit: source/01_Repas_TCP_IP/03b-divisio-24-en-26.png -->
+![Dividir una xarxa /24 en quatre xarxes /26](./source/01_Repas_TCP_IP/03b-divisio-24-en-26.png)
+
 ## 4. Configuració d'un equip: IP, màscara, gateway i DNS
 
 Per comunicar-se, un equip acostuma a necessitar:
@@ -148,6 +206,33 @@ Per comunicar-se, un equip acostuma a necessitar:
 4. Prova d'arribar al gateway. Després prova una IP externa i, finalment, un nom de domini. Si la IP funciona i el nom no, revisa DNS.
 
 > **Exemple d'error:** `170.100.4.10/24` pertany a `170.100.4.0/24`. Un gateway `170.100.5.140` és en una altra subxarxa i no serveix com a porta d'enllaç local en la configuració ordinària plantejada.
+
+### Consultar la configuració real i diagnosticar per capes
+
+En Windows, `ipconfig /all` mostra les dades de cada adaptador i `route print` permet consultar les rutes. En Ubuntu, les consultes equivalents es poden separar:
+
+```bash
+ip -br link
+ip -4 -br addr
+ip route
+resolvectl status
+ip neigh
+```
+
+No interpretis una IP sense identificar abans la interfície. Una màquina virtual pot tenir alhora un adaptador NAT i un de xarxa interna, cadascun amb una funció diferent.
+
+| Prova | Què comprova principalment? | Què no demostra tota sola? |
+|---|---|---|
+| `ping 127.0.0.1` o `ping ::1` | Pila local i *loopback* | Connexió amb la xarxa física o virtual |
+| `ping <IP-del-gateway>` | Arribada al següent salt local, si respon ICMP | Accés a Internet o funcionament de DNS |
+| `ping 1.1.1.1` | Connectivitat IP fins a aquella destinació, si respon | Resolució de noms ni qualsevol altre servei |
+| `nslookup nom.exemple` o `getent hosts nom.exemple` | Resolució del nom consultat | Que el servei final estigui disponible |
+| `Test-NetConnection host -Port 22` o `nc -vz host 22` | Intent de connexió al port indicat | Que l'aplicació funcioni correctament després de connectar |
+
+Segueix un ordre: **enllaç → IP i prefix → veí/gateway → ruta → connectivitat per IP → DNS → port i servei**. Formula una hipòtesi i canvia una sola cosa cada vegada.
+
+<!-- IMATGE 04A: Diagrama de diagnosi en set passos: enllaç, IP/prefix, veí o gateway, ruta, prova per IP, DNS i servei/port. A cada pas associa una ordre de Windows i una d'Ubuntu i mostra on s'atura la diagnosi segons el primer resultat incorrecte. Fitxer suggerit: source/01_Repas_TCP_IP/04a-diagnosi-per-capes.png -->
+![Diagnosi per Capes en 7 pasos](./source/01_Repas_TCP_IP/04a-diagnosi-per-capes.png)
 
 ## 5. Encaminament entre xarxes
 
@@ -176,6 +261,9 @@ La capa de transport permet la comunicació entre aplicacions. **TCP** estableix
 | Connexió abans d'intercanviar dades | Sí | No, en el sentit de TCP |
 | Garantia de lliurament i ordre del protocol de transport | Sí, mentre la connexió funciona | No |
 | Exemples habituals | HTTPS sobre TCP, SSH | DNS habitualment, comunicacions en temps real i QUIC/HTTP/3 |
+
+<!-- IMATGE 05A: Comparació en dues columnes entre TCP i UDP. A TCP mostra SYN, SYN-ACK, ACK i després dades numerades amb confirmació; a UDP mostra datagrames independents sense establiment equivalent. Inclou port d'origen temporal i port de destinació del servei, i evita afirmar que UDP és sempre més ràpid. Fitxer suggerit: source/01_Repas_TCP_IP/05a-tcp-udp-i-ports.png -->
+![TCP i UDP: Com viatgen les dades](./source/01_Repas_TCP_IP/05a-tcp-udp-i-ports.png)
 
 **UDP no significa sempre «més ràpid»**, ni TCP assegura que un servei remot funcioni correctament: l'elecció depèn dels requisits de l'aplicació. Els ports `0–1023` són coneguts o *well-known*; `1024–49151`, registrats; `49152–65535`, dinàmics/privats. Un client sovint utilitza un port d'origen temporal i es connecta al port de destinació del servei.
 
@@ -273,6 +361,7 @@ Utilitza la taula de l'apartat 5. Per a cada destinació, indica **quina ruta co
 Completa les IP i màscares de tots els ordinadors, de la impressora i de les interfícies dels routers en **l'esquema original de l'activitat**. Representa la xarxa a Packet Tracer i comprova la comunicació amb **RIPv2** entre routers.
 
 <!-- IMATGE 07 — NECESSÀRIA PER A L'ACTIVITAT 6: Insereix aquí la figura de la pàgina 3 del PDF AA2-RepasXarxes, o una recreació fidel en alta resolució. Cal que es vegin PC0–PC12, Printer0, Router2, Router0, els enllaços, les tres xarxes RED 1/2/3 i totes les etiquetes grogues amb adreces parcials. Fitxer suggerit: imatges/activitat-6-topologia.png -->
+![Topología Xarxes](./source/01_Repas_TCP_IP/07-topologia.png)
 
 **Dades visibles a l'esquema, per poder preparar la pràctica:**
 
@@ -295,9 +384,23 @@ Completa les IP i màscares de tots els ordinadors, de la impressora i de les in
 
 > **Si falla:** comprova, en aquest ordre, IP/màscara, gateway, estat de les interfícies, connexió física, xarxes anunciades a RIP i ruta de retorn. Documenta la hipòtesi, la prova que fas i el resultat.
 
+### Activitat 7 · Dimensionar i dividir subxarxes
+
+1. Una aula necessita adreces per a 50 ordinadors, 2 impressores i la interfície del router. Quin és el prefix més llarg que encara permet allotjar tots els dispositius en una subxarxa IPv4 convencional? Indica màscara, adreces totals, hosts assignables i marge lliure.
+2. Divideix `192.168.10.0/24` en quatre subxarxes iguals. Per a cadascuna, escriu la xarxa amb prefix, el primer i l'últim host i el broadcast. Comprova que no hi hagi buits ni solapaments.
+
+### Activitat 8 · Diagnosi amb evidències
+
+Un equip té `192.168.50.20/24`, gateway `192.168.50.1` i DNS `192.168.50.2`. Pot arribar al gateway i a `1.1.1.1`, però `www.upc.edu` no es resol.
+
+1. Quines parts de la configuració ja tenen evidència de funcionar?
+2. Quina és la hipòtesi inicial més concreta?
+3. Escriu una prova adequada per a Windows i una per a Ubuntu.
+4. Explica per què canviar la màscara o la porta d'enllaç no seria el primer pas justificat.
+
 ## 9. Solucionari raonat de les activitats
 
-> **Com utilitzar aquest apartat:** resol primer les activitats 1–6 i consulta les respostes per detectar quin pas del teu raonament ha fallat. En la pràctica amb l'ordinador, compara el **mètode**: les adreces, els PID i les connexions observades canviaran segons l'equip.
+> **Com utilitzar aquest apartat:** resol primer les activitats 1–8 i consulta les respostes per detectar quin pas del teu raonament ha fallat. En la pràctica amb l'ordinador, compara el **mètode**: les adreces, els PID i les connexions observades canviaran segons l'equip.
 
 ### Solució de l'activitat 1 · Adreces de xarxa
 
@@ -370,7 +473,7 @@ No hi ha una captura de sortida única correcta: depèn del sistema, les aplicac
 
 La figura dona **parts** de les IP. La solució següent completa tots els camps de manera coherent amb aquestes pistes; qualsevol assignació alternativa només seria vàlida si respectés tots els valors que ja apareixen a l'esquema, les màscares i l'absència de duplicats.
 
-![Esquema de la solució](./source/01_Repas_TCP_IP/06-activitat-packet-tracer.png)
+![Esquema de la solució](./source/01_Repas_TCP_IP/08-activitat-packet-tracer.png)
 
 | Xarxa | Dispositiu o interfície | IP/prefix | Porta d'enllaç de l'equip |
 |---|---|---|---|
@@ -430,6 +533,27 @@ PC12> ping 172.26.255.254
 
 Primer prova el gateway local des de cada PC. Si funciona el `ping` local però falla entre xarxes, revisa que cada router anunciï també **l'enllaç `10.0.0.0/8`**, que hagin aparegut rutes `R` i que els PC de destinació tinguin la porta d'enllaç correcta. RIP pot necessitar una estona per intercanviar les rutes.
 
+### Solució de l'activitat 7 · Dimensionament i divisió
+
+1. Calen `50 + 2 + 1 = 53` adreces assignables. Amb 5 bits d'equip, `2^5 − 2 = 30`, que no és suficient. Amb 6 bits, `2^6 − 2 = 62`; el prefix és `/26` i la màscara `255.255.255.192`. El bloc conté 64 adreces totals, 62 hosts assignables i deixa `62 − 53 = 9` adreces assignables de marge.
+2. Per obtenir quatre blocs es prenen 2 bits del `/24`: `/24 + 2 = /26`. El salt és 64.
+
+| Xarxa | Primer host | Últim host | Broadcast |
+|---|---|---|---|
+| `192.168.10.0/26` | `192.168.10.1` | `192.168.10.62` | `192.168.10.63` |
+| `192.168.10.64/26` | `192.168.10.65` | `192.168.10.126` | `192.168.10.127` |
+| `192.168.10.128/26` | `192.168.10.129` | `192.168.10.190` | `192.168.10.191` |
+| `192.168.10.192/26` | `192.168.10.193` | `192.168.10.254` | `192.168.10.255` |
+
+Els quatre blocs són consecutius i `4 × 64 = 256`, el mateix nombre d'adreces totals que tenia el `/24` original.
+
+### Solució de l'activitat 8 · Diagnosi amb evidències
+
+1. Arribar a `192.168.50.1` aporta evidència de connectivitat local fins al gateway. Arribar a `1.1.1.1` aporta evidència que hi ha una ruta IP funcional fins a aquella destinació. No prova que tots els serveis d'Internet funcionin.
+2. Com que falla el nom després de funcionar una prova per IP, la primera hipòtesi és un problema de **resolució DNS**: servidor inabastable, adreça DNS incorrecta o resposta invàlida.
+3. A Windows es pot executar `nslookup www.upc.edu 192.168.50.2`; a Ubuntu, `resolvectl query www.upc.edu` i `resolvectl status` permeten comprovar la consulta i quin DNS utilitza la interfície. També es pot consultar el servidor explícitament amb `dig @192.168.50.2 www.upc.edu` si l'eina està instal·lada.
+4. La màscara i la porta d'enllaç actuals ja han permès arribar al gateway i a una IP externa. Canviar-les sense una evidència contrària afegiria una variable nova i podria eliminar connectivitat que ara funciona.
+
 ## 10. Autoavaluació final
 
 Pots explicar, sense mirar els apunts:
@@ -443,6 +567,19 @@ Pots explicar, sense mirar els apunts:
 - Per què una connexió cap al gateway pot funcionar mentre falla l'accés per nom a un web?
 
 Si alguna resposta no és clara, torna a la secció corresponent, construeix un exemple propi i verifica'l amb les eines del sistema o a Packet Tracer.
+
+<details>
+<summary><strong>Respostes breus per comprovar l'autoavaluació</strong></summary>
+
+1. La màscara o prefix determina quins bits formen la xarxa i, per tant, els límits del bloc.
+2. La xarxa és el primer valor del bloc; el broadcast, l'últim; en una LAN IPv4 convencional, els hosts assignables queden entre tots dos.
+3. El broadcast representa tots els hosts del segment i no és una adreça assignable a la interfície del router.
+4. La ruta per defecte s'utilitza quan no hi ha cap ruta més específica; una xarxa directament connectada es pot lliurar sense un router intermedi com a següent salt.
+5. TCP manté estat de connexió; UDP no estableix una connexió equivalent i `netstat` mostra sockets UDP sense `ESTABLISHED`.
+6. PAT/NAPT manté associacions d'IP i ports per distingir els fluxos dels diferents equips rere una IP pública.
+7. El camí IP fins al gateway pot ser correcte mentre falla el servidor DNS, la seva adreça o la consulta del nom.
+
+</details>
 
 ---
 

@@ -1187,8 +1187,9 @@ Des de la consola de VirtualBox:
 sudo netplan try
 ```
 
-<!-- IMATGE IMPRESCINDIBLE: prova de Netplan pendent de confirmació, mostrant el mecanisme de reversió temporal. Fitxer recomanat: imatges/32-netplan-try.png -->
-<!-- CAPTURA PDF (pàgina 31): terminal amb "sudo netplan apply" i "sudo netplan ip leases enp0s3" mostrant ADDRESS, NETMASK, ROUTER i DNS assignats per DHCP -->
+![Netplan try pendent de confirmació i comprovació posterior de les dues interfícies](./source/00_UbuntuServer_Images/65-server-netplan-prova-adreces-estat.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): netplan try mostra el termini de reversió; després de confirmar, ip -br a i netplan status --all mostren la interfície NAT per DHCP i la interfície interna amb 192.168.50.10/24 -->
+<!-- CAPTURA PENDENT: sudo netplan ip leases enp0s3 mostrant ADDRESS, NETMASK, ROUTER i DNS de la concessió DHCP. No cal repetir la resta de comprovacions de la captura anterior. -->
 
 Confirma dins del termini només si la configuració funciona.
 
@@ -1212,7 +1213,7 @@ Hauries de veure:
 - Una IP automàtica a la interfície NAT.
 - `192.168.50.10/24` a la interfície interna.
 
-<!-- IMATGE IMPRESCINDIBLE: sortida final de ip -br a mostrant la IP DHCP del NAT i la IP estàtica de la xarxa interna. Fitxer recomanat: imatges/33-adreces-finals.png -->
+La captura de l'apartat anterior permet comprovar totes dues adreces i evita repetir la mateixa evidència.
 
 ### 11.8 Comprovar les rutes
 
@@ -1232,7 +1233,9 @@ resolvectl status
 getent hosts ubuntu.com
 ```
 
-<!-- IMATGE IMPRESCINDIBLE: comprovació funcional del DNS mitjançant resolvectl status i getent hosts. Fitxer recomanat: imatges/35-comprovacio-dns.png -->
+![Resolució correcta del nom ubuntu.com amb getent hosts](./source/00_UbuntuServer_Images/66-server-comprovacio-dns-resolucio.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): getent hosts ubuntu.com retorna diverses adreces, fet que comprova la resolució del nom. La sortida pot variar amb el temps. -->
+<!-- CAPTURA PENDENT: resolvectl status enquadrat juntament amb una consulta correcta de getent hosts, de manera que es vegin tant els DNS efectius de la interfície NAT com el resultat funcional. -->
 
 ### 11.10 Fer proves de connectivitat per capes
 
@@ -1847,6 +1850,12 @@ Una instantània no substitueix una OVA, i una OVA no substitueix les còpies de
    sudo apt upgrade
    ```
 
+   ![Actualització final completada amb l'avís que cal reiniciar per carregar el nucli nou](./source/00_UbuntuServer_Images/67-server-actualitzacio-final-reinici-pendent.png)
+   <!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): apt indica que els paquets estan actualitzats, però needrestart detecta un nucli nou pendent de carregar -->
+
+   > [!WARNING]
+   > Si apareix **Pending kernel upgrade**, reinicia abans d'exportar i repeteix les comprovacions. Que `apt` indiqui que no hi ha paquets pendents no significa que el nucli nou ja s'estigui executant.
+
 3. Revisa que no hi hagi cap contrasenya, clau privada, token o fitxer personal que no s'hagi de distribuir.
 4. Repeteix la validació de l'apartat 12.
 5. Comprova localment l'identificador de la instal·lació per poder detectar còpies duplicades:
@@ -1877,7 +1886,15 @@ Una instantània no substitueix una OVA, i una OVA no substitueix les còpies de
 Amb la VM apagada:
 
 1. Obre l'opció **Fitxer > Exporta una aplicació virtual** de VirtualBox. Segons la versió, també pot aparèixer dins de l'eina **Aplicacions**.
+
+   ![Menú de VirtualBox amb l'opció Exportar servei virtualitzat](./source/00_UbuntuServer_Images/68-virtualbox-menu-exportar-ova.png)
+   <!-- Captura pròpia de la pràctica (VirtualBox): accés a l'assistent d'exportació des del menú Archivo de la interfície en castellà -->
+
 2. Selecciona únicament `UbuntuServer24.04_BASE`.
+
+   ![Assistent d'exportació amb la màquina UbuntuServer BaseStudy seleccionada](./source/00_UbuntuServer_Images/69-virtualbox-exportar-seleccio-maquina.png)
+   <!-- Captura pròpia de la pràctica (VirtualBox): selecció d'una única màquina virtual abans d'exportar -->
+
 3. Tria el format **Open Virtualization Format 2.0** si està disponible.
 4. Selecciona un fitxer de sortida amb un nom clar, per exemple:
 
@@ -1887,12 +1904,24 @@ Amb la VM apagada:
 
 5. Revisa la llista de discos i confirma que no s'hi inclogui la ISO d'instal·lació.
 6. Activa la creació del manifest si VirtualBox ofereix aquesta opció.
+
+   ![Configuració de l'exportació amb format OVF 2.0, fitxer OVA i manifest activat](./source/00_UbuntuServer_Images/70-virtualbox-exportar-format-manifest.png)
+   <!-- Captura pròpia de la pràctica (VirtualBox): format Open Virtualization Format 2.0, ruta de sortida, política de MAC i manifest -->
+
 7. Completa les metadades útils, com el nom del producte, la versió i una descripció breu.
+
+   ![Apartat de metadades del servei virtualitzat abans de completar l'exportació](./source/00_UbuntuServer_Images/71-virtualbox-exportar-metadades.png)
+   <!-- Captura pròpia de la pràctica (VirtualBox): camps de nom, producte, versió, descripció i llicència de l'OVA -->
+
 8. Inicia l'exportació i espera que finalitzi sense tancar VirtualBox.
 
-<!-- IMATGE IMPRESCINDIBLE: assistent d'exportació de VirtualBox amb la VM correcta, format OVF 2.0, nom del fitxer OVA i opcions revisades abans de confirmar. Fitxer recomanat: imatges/44-assistent-exportacio-ova.png -->
+   ![VirtualBox exportant el servei virtualitzat amb la màquina original apagada](./source/00_UbuntuServer_Images/72-virtualbox-exportacio-ova-progres.png)
+   <!-- Captura pròpia de la pràctica (VirtualBox): indicador de progrés de l'escriptura del servei virtualitzat -->
 
-<!-- IMATGE IMPRESCINDIBLE: fitxer UbuntuServer24.04_BASE.ova creat correctament, amb el nom, la mida i la data visibles. Fitxer recomanat: imatges/45-fitxer-ova-exportat.png -->
+> [!NOTE]
+> Les captures mostren els noms utilitzats durant aquesta execució (`UbuntuServer_BaseStudy` i `UbuntuServer_OVA_Test`). Pots adaptar-los a la convencí del curs; el que cal mantenir és que la base i la còpia importada tinguin noms inequívocament diferents.
+
+<!-- IMATGE IMPRESCINDIBLE PENDENT: fitxer UbuntuServer24.04_BASE.ova creat correctament, amb el nom, la mida i la data visibles i sense menús que el tapin. Fitxer suggerit: source/00_UbuntuServer_Images/72a-fitxer-ova-exportat.png -->
 
 ### 15.4 Registrar la integritat de l'OVA
 
@@ -1924,7 +1953,13 @@ No donis l'exportació per bona només perquè existeixi el fitxer. Fes una impo
 8. Abans d'arrencar, revisa els dos adaptadors: Adaptador 1 en NAT i Adaptador 2 a `SMX-LAB`.
 9. Anota les MAC noves i confirma que no coincideixen amb les de la VM original.
 
-<!-- IMATGE IMPRESCINDIBLE: assistent d'importació de l'OVA amb el nom PROVA_OVA i la política de generació de MAC noves per a tots els adaptadors. Fitxer recomanat: imatges/46-importacio-ova-mac-noves.png -->
+![Assistent d'importació amb un nom diferent i generació de MAC noves per a tots els adaptadors](./source/00_UbuntuServer_Images/73-virtualbox-importar-ova-mac-noves.png)
+<!-- Captura pròpia de la pràctica (VirtualBox): nom UbuntuServer_OVA_Test i política de generació d'una MAC nova per a tots els adaptadors -->
+
+![Màquina original i còpia importada identificades amb noms diferents i totes dues apagades](./source/00_UbuntuServer_Images/74-virtualbox-ova-importada.png)
+<!-- Captura pròpia de la pràctica (VirtualBox): resultat de la importació amb la base original i UbuntuServer_OVA_Test separades -->
+
+<!-- CAPTURA PENDENT: resum de la còpia importada amb l'Adaptador 1 en NAT i l'Adaptador 2 a SMX-LAB, tots dos amb cable connectat i MAC noves. No utilitzis una captura on SMX-LAB aparegui com a Adaptador 1. -->
 
 ### 15.6 Validar la màquina importada
 
@@ -1942,6 +1977,12 @@ systemctl status ssh.service ssh.socket --no-pager
 sudo ss -ltnp
 ```
 
+![Validació de DNS, zona horària, sincronització i estat del socket SSH a la còpia importada](./source/00_UbuntuServer_Images/75-server-ova-validacio-dns-hora-ssh.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): resolvectl, timedatectl i systemctl mostren DNS, Europe/Madrid, sincronització i ssh.socket actiu -->
+
+![Ports en escolta de la còpia importada amb SSH al port 22 en IPv4 i IPv6](./source/00_UbuntuServer_Images/76-server-ova-ports-escolta.png)
+<!-- Captura pròpia de la pràctica (VirtualBox/Ubuntu Server): sudo ss -ltnp mostra el port 22 en escolta sense exposar contrasenyes ni machine-id -->
+
 Verifica també que:
 
 - L'arrencada acaba sense errors.
@@ -1951,7 +1992,7 @@ Verifica també que:
 - L'Adaptador 2 conserva la configuració interna prevista.
 - La resolució DNS, l'hora i OpenSSH funcionen.
 
-<!-- IMATGE IMPRESCINDIBLE: validació de la VM importada amb hostname, MAC, IP, ruta, DNS, hora i SSH comprovats; oculta machine-id i no mostris contrasenyes ni dades sensibles. Fitxer recomanat: imatges/47-validacio-ova-importada.png -->
+<!-- IMATGE PENDENT: captura complementària de la VM importada amb hostname, MAC, IP i ruta visibles. No mostris contrasenyes ni el valor de machine-id. Fitxer suggerit: source/00_UbuntuServer_Images/77-server-ova-validacio-identitat-xarxa.png -->
 
 ### 15.7 Personalitzar cada còpia abans d'utilitzar-la
 
