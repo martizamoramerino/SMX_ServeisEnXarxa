@@ -1,3 +1,4 @@
+![Portada del servei DHCP](./source/02_Servei_DHCP/00-servei-dhcp-portada.png)
 # Introducció al servei DHCP
 
 > **MP 0227 · Serveis de xarxa · 2n SMX**
@@ -73,6 +74,7 @@ Una **adreça MAC** identifica una interfície dins de l'enllaç local; una **ad
 > **Pregunta de control:** si el mòbil mostra que està connectat al Wi-Fi, ja saps que té una IP, una passarel·la i un DNS correctes? No: estar associat a la xarxa sense fil i disposar d'una configuració IP útil són comprovacions diferents.
 
 <!-- IMATGE 01: Esquema original d'un client de l'aula amb IP 192.168.50.120/24, porta d'enllaç 192.168.50.1, servidor DHCP 192.168.50.2 i servidor DNS representat com a servei diferenciat. Mostra amb fletxes què proporciona DHCP i què fa DNS. Fitxer suggerit: source/02_Teoria_DHCP/01-dades-de-xarxa-i-dhcp.png -->
+![Què fa el DHCP i DNS?](./source/02_Servei_DHCP/01-dades-de-xarxa-i-dhcp.png)
 
 ## 2. Què és DHCP i què aporta?
 
@@ -132,8 +134,9 @@ Per memoritzar l'ordre dels quatre missatges principals, utilitzem **DORA**:
 Si responen dos servidors, el client pot rebre més d'una oferta. Quan demana una oferta, deixa clar quin servidor ha seleccionat. **Una oferta encara no és una concessió confirmada**: cal interpretar també el `REQUEST` i l'`ACK`. L'enviament concret d'`OFFER` i `ACK` pot ser per unicast o broadcast segons l'estat del client i l'intercanvi; el diagrama simplificat de les diapositives serveix per entendre l'ordre, no per fixar un únic tipus d'enviament.
 
 <!-- IMATGE 02: Diagrama original de seqüència DORA amb client, servidor DHCP A i servidor DHCP B. Representa Discover, dues ofertes, Request que selecciona A i ACK d'A; ressalta que l'oferta no és encara una concessió confirmada. No etiquetis tots els Offer i ACK com a broadcast obligatori. Fitxer suggerit: source/02_Teoria_DHCP/02-sequencia-dora.png -->
-
+![DORA: De la recerca a la concesió](./source/02_Servei_DHCP/02-sequencia-dora.png)
 <!-- CAPTURA RECOMANADA — DORA A WIRESHARK: captura pròpia filtrada amb `dhcp` o `bootp` on apareguin, en ordre, Discover, Offer, Request i ACK. Mostra les columnes origen, destinació, protocol i informació; destaca UDP 68→67 i 67→68 i anonimitza qualsevol dada no necessària. Fitxer suggerit: source/02_Teoria_DHCP/02b-dora-wireshark.png -->
+![DORA "Captura" de WireShark](./source/02_Servei_DHCP/02b-dora-wireshark.png)
 
 **Exercici breu:** tres companys representen un client i dos servidors. Cada servidor proposa una adreça diferent. Qui pot decidir quina oferta es demana? En quin missatge queda confirmada la concessió?
 
@@ -159,6 +162,7 @@ Suposem que una concessió comença a les **09.00** i dura **8 hores**. Si no es
 Si el servidor deixa de respondre a les 10.00, el client d'aquest exemple **no perd automàticament la IP a les 10.00**. Cal mirar si la seva concessió continua vigent i si es pot renovar abans del venciment.
 
 <!-- IMATGE 03: Línia temporal d'una concessió de 8 hores iniciada a les 09.00. Situa T1 a les 13.00, T2 a les 16.00 i el venciment a les 17.00. Distingueix les renovacions fallides d'una concessió ja caducada. Fitxer suggerit: source/02_Teoria_DHCP/03-concessio-t1-t2.png -->
+![Concessió DHCP de 8 hores](./source/02_Servei_DHCP/03-concessio-t1-t2.png)
 
 ### Missatges per a situacions diferents
 
@@ -191,6 +195,7 @@ ipconfig /all
 Busca almenys l'adreça IPv4, la màscara, la passarel·la predeterminada, els DNS, la indicació que DHCP està habilitat i, quan hi consti, el servidor DHCP i les hores d'inici i venciment de la concessió. Mira totes les dades: es pot tenir la IP automàtica i el DNS establert manualment.
 
 <!-- CAPTURA 04: Sortida pròpia d'ipconfig /all d'un client Windows que hagi obtingut DHCP. Enquadra l'adaptador correcte i destaca IPv4, màscara, porta d'enllaç, DNS, servidor DHCP i vigència de la concessió; oculta identificadors i informació sensible no necessaris. Fitxer suggerit: source/02_Teoria_DHCP/04-client-windows-ipconfig.png -->
+![DHCP Client Windows](./source/02_Servei_DHCP/04-client-windows-ipconfig.png)
 
 ### En un client Ubuntu
 
@@ -217,6 +222,7 @@ El client pot estar configurat en mode automàtic i, malgrat això, no obtenir c
 Una adreça `169.254.x.x` és una **pista**: indica que aquell client no mostra la configuració DHCP que esperàvem. Pot facilitar comunicació entre equips del mateix enllaç que tinguin adreces compatibles, però no dona per si sola una sortida normal a Internet. La selecció de l'adreça incorpora comprovacions amb ARP per evitar duplicats. No assumeixis que tots els sistemes Linux activaran automàticament aquest comportament per a IPv4; depèn del gestor de xarxa i de la configuració.
 
 <!-- IMATGE 06: Comparació de dos clients de la mateixa aula: un ha obtingut 192.168.50.120/24, porta d'enllaç i DNS per DHCP; l'altre mostra 169.254.23.8/16 sense la configuració esperada. Mostra l'abast local de l'adreça d'enllaç local i les preguntes que cal investigar, sense afirmar que qualsevol Linux l'assignarà. Fitxer suggerit: source/02_Teoria_DHCP/06-dhcp-versus-ip-enllac-local.png -->
+![DHCP Client Ubuntu](./source/02_Servei_DHCP/05-client-linux-comprovacions.png)
 
 **Seqüència de diagnosi si esperaves DHCP i no ha funcionat:**
 
