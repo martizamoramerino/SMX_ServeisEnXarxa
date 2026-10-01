@@ -1,4 +1,5 @@
 ![Portada](./source/00_UbuntuServer_Images/00-ubuntu-server-24-04-portada.png)
+
 # Ubuntu Server 24.04 LTS base per a Serveis en Xarxa
 
 > **MP07 · Serveis de xarxa · 2n SMX**

@@ -1,4 +1,5 @@
 ![Portada](./source/00_Zorin_OS/00-instalacio-zorin-os-portada.png)
+
 # Instal·lació de Zorin OS en una màquina virtual
 
 > **MP 0227 · Serveis de xarxa · 2n SMX**

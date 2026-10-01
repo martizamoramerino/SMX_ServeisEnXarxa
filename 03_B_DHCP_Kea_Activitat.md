@@ -1,3 +1,5 @@
+![Portada](./source/03_B_DHCP_KeaActivitat/00-activitat-dhcp-kea-zorin-portada.png)
+
 # Activitat guiada de DHCP amb Kea i Zorin
 
 > **MP 0227 · Serveis de xarxa · 2n SMX · RA1**

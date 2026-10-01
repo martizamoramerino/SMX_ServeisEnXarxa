@@ -1,3 +1,5 @@
+![Portada](./source/03_A_DHCP_Kea_Guide/00-configuracio-dhcp-kea-portada.png)
+
 # Configuració de DHCP amb Kea a Ubuntu Server
 
 > **MP 0227 · Serveis de xarxa · 2n SMX · RA1**

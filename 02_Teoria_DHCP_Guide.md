@@ -1,8 +1,8 @@
+![Portada](./source/02_Servei_DHCP/00-servei-dhcp-portada.png)
+
 # Introducció al servei DHCP
 
 > **MP 0227 · Serveis de xarxa · 2n SMX**
-
-![Portada del servei DHCP](./source/02_Servei_DHCP/00-servei-dhcp-portada.png)
 
 Guia d'estudi, anàlisi i diagnosi de la primera lliçó de DHCP, basada en la presentació *AA1 Teoria DHCP* i en la guia docent de la sessió.
 
