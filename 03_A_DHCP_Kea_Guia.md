@@ -131,6 +131,10 @@ ip route
 
 Confirma `try` només després de comprovar el resultat. La reversió no substitueix la còpia ni la consola de recuperació.
 
+![Interfícies, IP i rutes del servidor: enp0s3 (NAT) i enp0s8 (xarxa interna)](./source/03_A_DHCP_Kea_Guide/01-ip-interficies.png)
+
+![Aplicació de la configuració amb netplan generate i netplan try](./source/03_A_DHCP_Kea_Guide/02-netplan-try.png)
+
 <!-- IMATGE 01: topologia amb Ubuntu Server, NAT i SMX-LAB; etiqueta MAC, interfície i funció. Zorin és client de la xarxa interna. Fitxer suggerit: source/03_DHCP_Kea/01-topologia.png -->
 
 **Errors freqüents:** editar un YAML inexistent; copiar `enp0s8` sense identificar-lo; donar una passarel·la inventada a la interfície interna; usar noms de xarxa interna diferents.
@@ -161,6 +165,12 @@ systemctl list-unit-files 'kea*'
 
 `apt update` actualitza el catàleg; `apt upgrade` actualitza paquets. En aquesta primera execució els separem per poder interpretar el resultat. La presentació combina ordres amb `&&` i `-y`; `&&` condiciona la segona a l'èxit de la primera, i `-y` accepta confirmacions automàticament.
 
+![Execució d'apt update i apt upgrade](./source/03_A_DHCP_Kea_Guide/03-apt-update-upgrade.png)
+
+![Instal·lació del paquet kea i dels paquets addicionals](./source/03_A_DHCP_Kea_Guide/04-apt-install-kea.png)
+
+![Versió de Kea i unitats systemd instal·lades](./source/03_A_DHCP_Kea_Guide/06-versio-i-unitats.png)
+
 Kea és la implementació de DHCP que treballarem. No barregis aquesta configuració amb tutorials d'`isc-dhcp-server`: tenen fitxers i sintaxi diferents.
 
 #### L'agent de control
@@ -170,6 +180,8 @@ La instal·lació del conjunt `kea` pot preguntar com configurar l'autenticació
 ```bash
 sudo dpkg-reconfigure kea-ctrl-agent
 ```
+
+![Assistent de configuració de kea-ctrl-agent](./source/03_A_DHCP_Kea_Guide/05-kea-ctrl-agent-opcions.png)
 
 Aquesta ordre permet recuperar l'assistent si el paquet està instal·lat. La contrasenya de l'API no és la del teu usuari, ni una contrasenya que necessitin els clients per obtenir DHCP. Aquí administrarem Kea amb fitxers i `systemctl`; no necessitem publicar l'API.
 
@@ -198,6 +210,8 @@ sudo systemctl disable --now kea-dhcp-ddns-server
 sudo systemctl disable --now kea-ctrl-agent
 ```
 
+![Desactivació dels serveis de Kea que no s'utilitzen](./source/03_A_DHCP_Kea_Guide/07-desactivar-serveis.png)
+
 Desactivar DHCPv6 de Kea **no desactiva IPv6 de tot Ubuntu**. Desactivar DDNS tampoc impedeix anunciar un DNS amb l'opció `domain-name-servers`.
 
 | Acció | Significat |
@@ -209,6 +223,8 @@ Desactivar DHCPv6 de Kea **no desactiva IPv6 de tot Ubuntu**. Desactivar DDNS ta
 | `status` | Consultar l'estat i missatges recents |
 
 `active` i `enabled` no són sinònims. Un servei pot estar funcionant però no arrencar automàticament després d'un reinici.
+
+![Estat de kea-dhcp4-server amb la configuració per defecte: avís "no interface configured"](./source/03_A_DHCP_Kea_Guide/08-estat-config-per-defecte.png)
 
 ---
 
@@ -230,6 +246,8 @@ Kea llegeix `/etc/kea/kea-dhcp4.conf`. Conserva una còpia abans de substituir-n
 sudo cp -a /etc/kea/kea-dhcp4.conf /etc/kea/kea-dhcp4.conf.abans-laboratori
 sudo nano /etc/kea/kea-dhcp4.conf
 ```
+
+![Fitxer original /etc/kea/kea-dhcp4.conf obert amb nano (`"interfaces": [ ]` buit)](./source/03_A_DHCP_Kea_Guide/09-config-original-nano.png)
 
 Tria un altre nom si la còpia ja existeix. Copiar manté l'original al seu lloc; moure'l, com fa el PDF, el retira fins que es crea el fitxer nou.
 
@@ -264,33 +282,83 @@ Aquest és només un fragment explicatiu: `interfaces-config` és un objecte i `
 Aquest exemple conserva el servidor de la base a `192.168.50.10/24`. Utilitza un **pool `.100–.149`**, diferent del de l'activitat. El servidor només atén `enp0s8`.
 
 ```json
+# Inici de la configuració
 {
+  # Aquí comença la configuració del servidor DHCPv4
   "Dhcp4": {
+
+    # Indiquem per quina interfície funcionarà el servidor DHCP
+    # Aquesta ha de ser la interfície connectada a la xarxa interna SMX-LAB
     "interfaces-config": {
       "interfaces": ["enp0s8"]
     },
+
+    # Definim els valors globals de les concessions
+
+    # Durada total de la concessió, expressada en segons
     "valid-lifetime": 4000,
+
+    # T1: moment en què el client intenta renovar la concessió
+    # directament amb el servidor que l'ha concedida
     "renew-timer": 1000,
+
+    # T2: si la renovació anterior no funciona, el client intenta
+    # renovar la concessió mitjançant broadcast amb qualsevol servidor
     "rebind-timer": 2000,
+
+    # Indiquem que les concessions es guardaran en un fitxer
+    # Aquest fitxer actua com a base de dades de concessions
     "lease-database": {
       "type": "memfile",
       "persist": true,
       "name": "/var/lib/kea/kea-leases4.csv"
     },
+
+    # Definim les diferents subxarxes que gestionarà el servidor
     "subnet4": [
+
+      # Inici de la configuració de la primera subxarxa
       {
+        # Identificador únic de la subxarxa dins de Kea
         "id": 1,
+
+        # Indiquem la subxarxa de treball
         "subnet": "192.168.50.0/24",
+
+        # El pool indica el conjunt d'adreces que el servidor
+        # podrà assignar dinàmicament als clients
         "pools": [
-          { "pool": "192.168.50.100 - 192.168.50.149" }
+          {
+            "pool": "192.168.50.100 - 192.168.50.149"
+          }
         ],
+
+        # Indiquem les opcions addicionals que s'enviaran als clients
         "option-data": [
-          { "name": "routers", "data": "192.168.50.254" },
-          { "name": "domain-name-servers", "data": "8.8.8.8" }
+
+          # Porta d'enllaç que rebran els clients
+          {
+            "name": "routers",
+            "data": "192.168.50.254"
+          },
+
+          # Servidor DNS que rebran els clients
+          {
+            "name": "domain-name-servers",
+            "data": "8.8.8.8"
+          }
         ]
+
+      # Aquesta clau tanca la configuració de la primera subxarxa
       }
+
+    # Aquest claudàtor tanca la llista de subxarxes
     ]
+
+  # Aquesta clau tanca la configuració de DHCPv4
   }
+
+# Aquesta clau tanca la configuració inicial
 }
 ```
 
@@ -305,6 +373,8 @@ Aquest exemple conserva el servidor de la base a `192.168.50.10/24`. Utilitza un
 | `option-data` | Opcions que s'envien als clients |
 | `routers` | Passarel·la anunciada al client |
 | `domain-name-servers` | Servidors DNS anunciats |
+
+![Configuració pròpia de DHCPv4 escrita a nano](./source/03_A_DHCP_Kea_Guide/10-config-propia-nano.png)
 
 La subxarxa conté 256 adreces, habitualment 254 hosts; el pool té `149 − 100 + 1 = 50` adreces. El servidor `.10` queda fora del pool. No restem dues adreces al pool perquè xarxa i broadcast ja en són fora.
 
@@ -393,7 +463,7 @@ La ruta absoluta evita dependre del directori des d'on executes l'ordre. La vali
 
 **Tres nivells de comprovació:** fitxer acceptat → procés funcionant → client configurat amb les dades correctes. Cal arribar al tercer.
 
-<!-- CAPTURA 03: prova kea-dhcp4 -t correcta i estat active del servei amb el nom d'unitat visible. Fitxer suggerit: source/03_DHCP_Kea/03-validacio-servei.png -->
+![Reinici, activació i estat active (running) de kea-dhcp4-server](./source/03_A_DHCP_Kea_Guide/11-estat-servei-actiu.png)
 
 ### 10. Comprovar el client
 
@@ -482,6 +552,10 @@ Diagnostica a partir d'evidències i comprova que pots justificar les decisions.
 | No aplica la reserva | MAC real, subxarxa, JSON carregat i nova negociació | Comparar captura i concessió |
 | El CSV indicat no existeix | Valor `lease-database.name` i registres | Consultar la ruta real; no crear fitxers buits |
 | Apareixen ofertes inesperades | Servidor DHCP que les envia | Revisar altres VM i modes de xarxa |
+
+**Exemple real:** el registre mostra l'error `got unexpected keyword "renew-time"` (clau mal escrita; la correcta és `renew-timer`). Un cop corregit, el servei arrenca i escolta a `enp0s8`.
+
+![Registres de journalctl: error de configuració i posterior arrencada correcta](./source/03_A_DHCP_Kea_Guide/12-error-renew-time-journal.png)
 
 Si revises ports, `sudo ss -lunp` aporta informació, però Kea pot utilitzar sockets de baix nivell: no utilitzis aquesta única sortida per decidir si atén clients. La captura a la interfície interna i els registres són les comprovacions decisives.
 
